@@ -1,66 +1,66 @@
-// ============================================================
-// 10年计划 · Service Worker — 离线缓存 & PWA 支持
-// ============================================================
-const CACHE_NAME = 'ten-year-plan-v2';
-const ASSETS = [
-  './index.html',
-  './manifest.json',
-  './sw.js'
-];
+// 10年计划 · Service Worker — 自动更新 + 离线支持
+const CACHE_NAME = 'ten-year-plan-v3';
+const ASSETS = ['./manifest.json', './sw.js'];
 
-// 安装：预缓存核心文件
+// 安装
 self.addEventListener('install', event => {
-  console.log('[SW] 安装中...');
+  console.log('[SW] 安装');
   event.waitUntil(
-    caches.open(CACHE_NAME).then(cache => {
-      return cache.addAll(ASSETS).catch(err => {
-        console.warn('[SW] 部分资源缓存失败（非关键）:', err);
-      });
-    })
+    caches.open(CACHE_NAME).then(cache => cache.addAll(ASSETS).catch(() => {}))
   );
-  // 立即激活，不等待旧 SW
   self.skipWaiting();
 });
 
-// 激活：清理旧缓存
+// 激活：清理旧缓存 + 立即接管
 self.addEventListener('activate', event => {
-  console.log('[SW] 已激活');
+  console.log('[SW] 激活');
   event.waitUntil(
-    caches.keys().then(keys => {
-      return Promise.all(
-        keys.filter(key => key !== CACHE_NAME).map(key => {
-          console.log('[SW] 清理旧缓存:', key);
-          return caches.delete(key);
-        })
-      );
-    })
+    caches.keys().then(keys => Promise.all(
+      keys.filter(k => k !== CACHE_NAME).map(k => caches.delete(k))
+    ))
   );
-  // 立即接管所有页面
   self.clients.claim();
 });
 
-// 请求：缓存优先 + 后台更新
+// 请求：HTML 网络优先，其他缓存优先
 self.addEventListener('fetch', event => {
-  // 只处理 GET 请求
   if (event.request.method !== 'GET') return;
+  const url = new URL(event.request.url);
 
+  // HTML 文件：网络优先（确保每次打开都是最新版本）
+  if (url.pathname.endsWith('.html') || url.pathname === '/' || url.pathname.endsWith('/')) {
+    event.respondWith(
+      fetch(event.request).then(response => {
+        const clone = response.clone();
+        caches.open(CACHE_NAME).then(cache => cache.put(event.request, clone));
+        return response;
+      }).catch(() => caches.match(event.request))
+    );
+    return;
+  }
+
+  // 其他资源：缓存优先
   event.respondWith(
     caches.match(event.request).then(cached => {
-      // 后台发起网络请求更新缓存
       const fetchPromise = fetch(event.request).then(response => {
         if (response && response.status === 200) {
-          const responseClone = response.clone();
-          caches.open(CACHE_NAME).then(cache => {
-            cache.put(event.request, responseClone);
-          });
+          const clone = response.clone();
+          caches.open(CACHE_NAME).then(cache => cache.put(event.request, clone));
         }
         return response;
-      }).catch(() => {
-        // 网络失败，若有缓存则已经返回了，这里什么都不做
-      });
-
-      // 返回缓存（如果有），否则等网络
+      }).catch(() => {});
       return cached || fetchPromise;
     })
   );
+});
+
+// 检测到新版本时通知所有页面刷新
+self.addEventListener('message', event => {
+  if (event.data === 'skipWaiting') {
+    self.skipWaiting();
+    self.clients.claim();
+    self.clients.matchAll().then(clients => {
+      clients.forEach(client => client.postMessage('reload'));
+    });
+  }
 });
