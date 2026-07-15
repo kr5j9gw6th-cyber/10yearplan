@@ -488,7 +488,7 @@ body { overflow-x: hidden; }
     <!-- Net Worth Tracking -->
     <div class="card" data-tab="assets">
         <div class="section-title"><span id="title-icon-nw"></span> 实际净值追踪</div>
-        <canvas id="nw-chart" width="560" height="220" style="width:100%;height:auto;margin-bottom:14px;border-radius:6px;"></canvas>
+        <canvas id="nw-chart" style="width:100%;height:auto;max-width:100%;margin-bottom:14px;border-radius:6px;"></canvas>
         <div class="nw-compare" id="nw-compare">
             <div class="nw-compare-value" id="nw-compare-val">--</div>
             <div class="nw-compare-label" id="nw-compare-lbl">尚未记录实际净值</div>
@@ -527,7 +527,7 @@ body { overflow-x: hidden; }
             <input type="number" id="asset-amount" placeholder="金额" step="100" style="padding:8px 10px;border:1px solid var(--border);border-radius:var(--radius-sm);font-size:0.85rem;font-family:inherit;background:var(--card);color:var(--text);width:100px;">
             <button class="btn-sm" id="btn-asset-add">添加</button>
         </div>
-        <canvas id="asset-growth-chart" width="560" height="180" style="width:100%;height:auto;margin-top:14px;border-radius:6px;"></canvas>
+        <canvas id="asset-growth-chart" style="width:100%;height:auto;max-width:100%;margin-top:14px;border-radius:6px;"></canvas>
         <div id="asset-list" style="margin-top:8px;font-size:0.82rem;"></div>
     </div>
 
