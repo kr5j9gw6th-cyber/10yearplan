@@ -1,0 +1,2179 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#3b82f6">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="10年计划">
+<link rel="manifest" href="manifest.json">
+<title>10年计划 · 倒计时打卡</title>
+<style>
+/* ===== Reset & Base ===== */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+    --bg: #f4f5f7;
+    --card: #ffffff;
+    --text: #131620;
+    --text2: #5f6b7a;
+    --text3: #9aa1af;
+    --accent: #4f6ef7;
+    --accent-hover: #3b54d4;
+    --accent-light: #eef1ff;
+    --success: #12b981;
+    --success-light: #ecfdf5;
+    --success-dark: #0d8a5e;
+    --warning: #f59e0b;
+    --warning-light: #fffbeb;
+    --danger: #f04444;
+    --danger-light: #fef2f2;
+    --border: #e9ebef;
+    --radius: 18px;
+    --radius-sm: 12px;
+    --shadow: 0 1px 2px rgba(0,0,0,0.03), 0 2px 4px rgba(0,0,0,0.03);
+    --shadow-md: 0 4px 16px rgba(0,0,0,0.05), 0 1px 2px rgba(0,0,0,0.04);
+    --shadow-lg: 0 8px 32px rgba(0,0,0,0.07), 0 2px 8px rgba(0,0,0,0.04);
+}
+body {
+    font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+    background: var(--bg); color: var(--text); min-height: 100vh; line-height: 1.55; -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale;
+}
+.container { max-width: 640px; margin: 0 auto; padding: 16px 16px 48px; }
+
+/* ===== Header ===== */
+.header { display: flex; align-items: center; justify-content: space-between; padding: 12px 0 16px; margin-bottom: 2px; }
+.header h1 { font-size: 1.65rem; font-weight: 750; letter-spacing: -0.02em; color: var(--text); }
+.header h1 .icon { color: var(--accent); }
+.header .subtitle { font-size: 0.8rem; color: var(--text2); font-weight: 500; letter-spacing: 0.02em; }
+
+/* ===== SVG Icons ===== */
+.icon { width: 1.1em; height: 1.1em; vertical-align: -0.2em; display: inline; stroke: currentColor; }
+.icon.accent { color: var(--accent); }
+.icon.success { color: var(--success); }
+.icon.warning { color: var(--warning); }
+.btn-icon { width: 38px; height: 38px; border: 1px solid var(--border); border-radius: 50%; background: var(--card); cursor: pointer; font-size: 1.15rem; display: flex; align-items: center; justify-content: center; transition: all 0.2s; color: var(--text2); }
+.btn-icon:hover { background: var(--bg); color: var(--accent); border-color: var(--accent); }
+
+/* ===== Tab Bar ===== */
+.tab-bar { display: flex; gap: 3px; margin-bottom: 18px; background: var(--card); border-radius: 16px; padding: 5px; box-shadow: var(--shadow-md); border: 1px solid var(--border); position: sticky; top: 8px; z-index: 10; }
+.tab-btn { flex: 1; padding: 11px 6px; border: none; background: transparent; border-radius: 12px; cursor: pointer; font-size: 0.84rem; font-weight: 600; color: var(--text2); transition: all 0.25s cubic-bezier(0.4,0,0.2,1); font-family: inherit; letter-spacing: 0.01em; }
+.tab-btn:hover { color: var(--text); }
+.tab-btn.active { background: var(--accent); color: #fff; box-shadow: 0 2px 8px rgba(79,110,247,0.3); }
+
+/* ===== Cards ===== */
+.card { background: var(--card); border-radius: var(--radius); padding: 22px 20px; box-shadow: var(--shadow); margin-bottom: 14px; border: 1px solid var(--border); transition: box-shadow 0.2s; }
+.card:hover { box-shadow: var(--shadow-md); }
+.card[data-tab] { display: none; }
+.card[data-tab].tab-visible { display: block; }
+.stats-row[data-tab] { display: none; }
+.stats-row[data-tab].tab-visible { display: grid; }
+.section-title { font-size: 0.82rem; font-weight: 650; color: var(--text2); margin-bottom: 16px; letter-spacing: 0.04em; text-transform: none; }
+
+/* ===== Dashboard ===== */
+.dash-status { text-align:center; margin-bottom:18px; }
+.dash-status-done { display:inline-block; padding:6px 18px; background:var(--success-light); border-radius:50px; font-size:0.82rem; color:var(--success-dark); font-weight:650; }
+.dash-status-todo { display:inline-block; padding:6px 18px; background:var(--accent-light); border-radius:50px; font-size:0.82rem; color:var(--accent-hover); font-weight:600; }
+.dash-status-weekend { font-size:0.85rem; color:var(--text3); }
+.dash-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.dash-item { background: var(--bg); border-radius: 14px; padding: 18px 14px 16px; position:relative; overflow:hidden; }
+.dash-item::before { content:''; position:absolute; top:0; left:0; right:0; height:3px; border-radius:3px 3px 0 0; }
+.dash-item.accent::before { background:var(--accent); }
+.dash-item.success::before { background:var(--success); }
+.dash-item.warn::before { background:#d97706; }
+.dash-item.neutral::before { background:var(--border); }
+.dash-val { font-size: 1.5rem; font-weight: 750; color: var(--text); letter-spacing: -0.02em; line-height: 1.15; font-variant-numeric: tabular-nums; }
+.dash-lbl { font-size: 0.66rem; color: var(--text3); margin-top: 5px; font-weight: 550; letter-spacing: 0.05em; }
+[data-theme="dark"] .dash-item { background: #111820; }
+
+/* ===== Countdown ===== */
+.countdown-hero { text-align: center; padding: 28px 20px 24px; }
+.countdown-number { font-size: 5rem; font-weight: 800; letter-spacing: -0.04em; color: var(--accent); line-height: 1; margin-bottom: 2px; font-variant-numeric: tabular-nums; }
+.countdown-label { font-size: 0.9rem; color: var(--text2); font-weight: 500; margin-bottom: 14px; }
+.countdown-breakdown { display: flex; justify-content: center; gap: 32px; margin-top: 6px; }
+.breakdown-item { text-align: center; min-width: 56px; }
+.breakdown-value { font-size: 1.5rem; font-weight: 700; color: var(--text); letter-spacing: -0.01em; }
+.breakdown-unit { font-size: 0.72rem; color: var(--text2); font-weight: 500; margin-top: 1px; text-transform: uppercase; letter-spacing: 0.05em; }
+
+/* ===== Progress ===== */
+.progress-section { padding: 18px 20px 20px; }
+.progress-header { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 12px; }
+.progress-percent { font-size: 2rem; font-weight: 750; color: var(--accent); letter-spacing: -0.02em; }
+.progress-elapsed { font-size: 0.78rem; color: var(--text3); font-weight: 500; }
+.progress-bar-outer { height: 8px; background: var(--border); border-radius: 4px; overflow: hidden; }
+.progress-bar-inner { height: 100%; background: var(--accent); border-radius: 4px; transition: width 0.8s cubic-bezier(0.4, 0, 0.2, 1); min-width: 0; }
+.progress-bar-inner.complete { background: var(--success); }
+
+/* ===== Compound Target ===== */
+.compound-hero { text-align: center; padding: 20px; }
+.compound-amount { font-size: 2.4rem; font-weight: 800; color: #d97706; letter-spacing: -0.03em; line-height: 1.2; }
+.compound-label { font-size: 0.82rem; color: var(--text2); font-weight: 500; margin-top: 4px; }
+.compound-compare { display: flex; justify-content: center; gap: 48px; margin-top: 18px; padding-top: 16px; border-top: 1px solid var(--border); }
+.compare-item { text-align: center; }
+.compare-val { font-size: 1.05rem; font-weight: 650; color: var(--text); }
+.compare-lbl { font-size: 0.68rem; color: var(--text3); font-weight: 500; margin-top: 2px; text-transform: uppercase; letter-spacing: 0.06em; }
+
+/* ===== Header Quote ===== */
+.header-quote { font-size: 0.78rem; color: var(--text3); font-weight: 400; margin-left: 10px; white-space: nowrap; }
+.header-quote::before { content: '「'; color: var(--text3); }
+.header-quote::after { content: '」'; color: var(--text3); }
+
+/* ===== Net Worth ===== */
+.nw-compare { text-align: center; margin-bottom: 14px; padding: 16px; border-radius: var(--radius-sm); }
+.nw-compare.ahead { background: var(--success-light); }
+.nw-compare.behind { background: var(--danger-light); }
+.nw-compare-value { font-size: 1.4rem; font-weight: 750; letter-spacing: -0.01em; }
+.nw-compare-value.ahead { color: var(--success-dark); }
+.nw-compare-value.behind { color: var(--danger); }
+.nw-compare-label { font-size: 0.8rem; color: var(--text); margin-top: 4px; font-weight: 550; }
+.nw-form { display: flex; gap: 8px; margin-bottom: 12px; }
+.nw-form input { padding: 10px 14px; border: 1.5px solid var(--border); border-radius: var(--radius-sm); font-size: 0.9rem; font-family: inherit; background: var(--bg); color: var(--text); }
+.nw-form input:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px rgba(79,110,247,0.1); }
+.nw-form .nw-amount { flex: 2; }
+.nw-form .nw-date { flex: 1; min-width: 110px; }
+.btn-sm { padding: 10px 18px; background: var(--accent); color: #fff; border: none; border-radius: 50px; font-size: 0.84rem; font-weight: 600; cursor: pointer; white-space: nowrap; font-family: inherit; transition: all 0.15s; letter-spacing: 0.01em; }
+.btn-sm:hover { background: var(--accent-hover); transform: translateY(-0.5px); }
+.btn-sm:active { transform: scale(0.97); }
+.nw-table { width: 100%; font-size: 0.84rem; border-collapse: collapse; }
+.nw-table th { color: var(--text2); font-weight: 600; text-align: left; padding: 8px 4px; border-bottom: 1.5px solid var(--border); font-size: 0.76rem; }
+.nw-table td { padding: 10px 4px; border-bottom: 1px solid var(--border); color: var(--text); }
+.nw-table .gap-pos { color: var(--success-dark); font-weight: 600; }
+.nw-table .gap-neg { color: var(--danger); font-weight: 600; }
+.nw-table .btn-del-sm { background: none; border: none; color: var(--text3); cursor: pointer; font-size: 0.9rem; padding: 2px 6px; border-radius: 4px; }
+.nw-table .btn-del-sm:hover { color: var(--danger); background: var(--danger-light); }
+
+/* ===== Asset Tracking ===== */
+.asset-summary { text-align: center; margin-bottom: 14px; }
+.asset-total-label { font-size: 0.74rem; color: var(--text3); font-weight: 500; text-transform: uppercase; letter-spacing: 0.06em; }
+.asset-total-value { font-size: 2.2rem; font-weight: 800; color: var(--text); letter-spacing: -0.03em; margin-top: 2px; }
+.asset-legend { font-size: 0.76rem; line-height: 1.9; }
+.asset-legend-item { display: flex; align-items: center; gap: 8px; margin-bottom: 2px; }
+.asset-legend-dot { width: 9px; height: 9px; border-radius: 3px; flex-shrink: 0; }
+.asset-legend-name { flex: 1; color: var(--text2); font-weight: 500; }
+.asset-legend-val { font-weight: 600; color: var(--text); font-variant-numeric: tabular-nums; }
+.asset-item { display: flex; align-items: center; gap: 10px; padding: 9px 0; border-bottom: 1px solid var(--border); font-size: 0.82rem; }
+[data-theme="dark"] .asset-item { border-color: #1e293b; }
+[data-theme="dark"] #asset-cat,
+[data-theme="dark"] #asset-name,
+[data-theme="dark"] #asset-amount { background: #1a2332; color: #e2e8f0; border-color: #334155; }
+[data-theme="dark"] #asset-cat option { background: #1e293b; }
+#asset-growth-chart { background: var(--bg); border-radius: 8px; }
+[data-theme="dark"] #asset-growth-chart { background: #111820; }
+.asset-item-cat { font-size: 0.68rem; padding: 3px 10px; border-radius: 50px; font-weight: 600; white-space: nowrap; letter-spacing: 0.02em; }
+.asset-item-name { flex: 1; color: var(--text); font-weight: 500; }
+.asset-item-amount { font-weight: 650; color: var(--text); font-variant-numeric: tabular-nums; }
+.asset-item-del { background: none; border: none; color: var(--text3); cursor: pointer; font-size: 0.9rem; padding: 2px 6px; border-radius: 50%; }
+.asset-item-del:hover { color: var(--danger); background: var(--danger-light); }
+
+/* ===== Discipline Check-in ===== */
+.discipline-modules { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 14px; }
+.disc-module { }
+.disc-module-label { font-size: 0.78rem; font-weight: 650; color: var(--text2); margin-bottom: 8px; text-align: center; letter-spacing: 0.02em; }
+.discipline-list { list-style: none; }
+.discipline-item { display: flex; align-items: center; gap: 10px; padding: 10px 12px; margin-bottom: 6px; background: var(--bg); border-radius: var(--radius-sm); cursor: pointer; transition: all 0.2s; border: 1.5px solid transparent; }
+.discipline-item:hover { background: var(--accent-light); border-color: transparent; }
+.discipline-item.confirmed { background: var(--success-light); border-color: #a7f3d0; }
+.discipline-checkbox { width: 20px; height: 20px; border-radius: 50%; border: 2px solid #d1d5db; flex-shrink: 0; display: flex; align-items: center; justify-content: center; transition: all 0.25s; font-size: 0.65rem; color: transparent; }
+.discipline-item.confirmed .discipline-checkbox { background: var(--success); border-color: var(--success); color: #fff; }
+.discipline-text { font-size: 0.82rem; color: var(--text); flex: 1; font-weight: 500; line-height: 1.4; }
+.discipline-item.confirmed .discipline-text { color: var(--success-dark); text-decoration: line-through; text-decoration-color: #a7f3d0; }
+.checkin-note-input { width: 100%; padding: 11px 16px; border: 1.5px solid var(--border); border-radius: var(--radius-sm); font-size: 0.9rem; font-family: inherit; margin-bottom: 16px; background: var(--bg); resize: none; height: 44px; color: var(--text); }
+.checkin-note-input:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px rgba(79,110,247,0.1); }
+.btn-checkin-wrap { text-align: center; }
+.btn-checkin { display: inline-flex; align-items: center; justify-content: center; gap: 8px; width: 100%; max-width: 320px; padding: 17px 32px; font-size: 1.15rem; font-weight: 700; color: #fff; background: var(--accent); border: none; border-radius: 50px; cursor: pointer; transition: all 0.25s; letter-spacing: 0.03em; box-shadow: 0 4px 16px rgba(79,110,247,0.3); font-family: inherit; }
+.btn-checkin:hover { background: var(--accent-hover); transform: translateY(-2px); box-shadow: 0 8px 24px rgba(79,110,247,0.4); }
+.btn-checkin:active { transform: translateY(0); }
+.btn-checkin:disabled { background: #d1d5db; cursor: not-allowed; box-shadow: none; transform: none; }
+.btn-checkin:disabled:hover { background: #d1d5db; transform: none; }
+.checkin-done { text-align: center; }
+.checkin-done-badge { display: inline-flex; align-items: center; gap: 8px; padding: 14px 28px; background: var(--success-light); border-radius: 50px; color: var(--success-dark); font-weight: 700; font-size: 1rem; margin-bottom: 12px; }
+.checkin-done-badge .cm { width: 28px; height: 28px; background: var(--success); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: #fff; font-size: 0.8rem; flex-shrink: 0; }
+.checkin-done-detail { font-size: 0.82rem; color: var(--text2); margin-top: 6px; line-height: 1.7; }
+.checkin-done-detail span { color: var(--success-dark); }
+.checkin-done-note { font-size: 0.85rem; color: var(--text2); margin-top: 10px; font-style: italic; }
+.checkin-maxim { margin-top: 14px; padding: 12px 18px; background: var(--accent-light); border-radius: var(--radius-sm); font-size: 0.84rem; color: var(--accent-hover); font-weight: 500; line-height: 1.6; }
+.streak-badge { display: inline-flex; align-items: center; gap: 6px; margin-top: 16px; padding: 8px 18px; background: var(--warning-light); color: #b45309; border-radius: 50px; font-size: 0.84rem; font-weight: 600; }
+
+/* ===== Weekend & Complete ===== */
+.weekend-notice { text-align: center; padding: 28px; color: var(--text2); font-size: 1rem; }
+.weekend-notice .emoji { font-size: 2.5rem; display: block; margin-bottom: 10px; }
+
+/* ===== Impulse Log ===== */
+.impulse-form { display: flex; gap: 8px; margin-bottom: 14px; }
+.impulse-input { flex: 1; padding: 11px 18px; border: 1.5px solid var(--border); border-radius: 50px; font-size: 0.9rem; font-family: inherit; background: var(--bg); color: var(--text); }
+.impulse-input:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px rgba(79,110,247,0.1); }
+.btn-impulse { padding: 11px 22px; background: var(--danger); color: #fff; border: none; border-radius: 50px; font-size: 0.85rem; font-weight: 600; cursor: pointer; white-space: nowrap; transition: all 0.15s; font-family: inherit; }
+.btn-impulse:hover { background: #dc2626; }
+.btn-impulse:active { transform: scale(0.95); }
+.impulse-empty { text-align: center; color: var(--text3); font-size: 0.84rem; padding: 20px 0; }
+.impulse-list { max-height: 220px; overflow-y: auto; }
+.impulse-item { display: flex; align-items: flex-start; gap: 10px; padding: 12px 0; border-bottom: 1px solid var(--border); }
+.impulse-item:last-child { border-bottom: none; }
+.impulse-item-time { font-size: 0.72rem; color: var(--text3); white-space: nowrap; flex-shrink: 0; min-width: 42px; font-variant-numeric: tabular-nums; }
+.impulse-item-text { font-size: 0.86rem; color: var(--text); flex: 1; word-break: break-all; line-height: 1.5; }
+.impulse-item-badge { font-size: 0.7rem; padding: 3px 12px; border-radius: 50px; font-weight: 600; white-space: nowrap; flex-shrink: 0; }
+.impulse-item-badge.resisted { background: var(--success-light); color: var(--success-dark); }
+.impulse-item-del { background: none; border: none; color: var(--text3); cursor: pointer; font-size: 0.9rem; padding: 2px 6px; border-radius: 50%; }
+.impulse-item-del:hover { color: var(--danger); background: var(--danger-light); }
+.impulse-stats { display: flex; gap: 24px; margin-top: 14px; padding-top: 12px; border-top: 1px solid var(--border); font-size: 0.76rem; color: var(--text2); justify-content: center; font-weight: 500; }
+.impulse-stats strong { color: var(--success-dark); }
+
+/* ===== Stats Row ===== */
+.stats-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 14px; }
+.stat-card { background: var(--card); border-radius: var(--radius); padding: 18px 10px; text-align: center; box-shadow: var(--shadow); border: 1px solid var(--border); transition: box-shadow 0.2s; }
+.stat-card:hover { box-shadow: var(--shadow-md); }
+.stat-value { font-size: 1.6rem; font-weight: 750; color: var(--text); line-height: 1.2; letter-spacing: -0.01em; }
+.stat-label { font-size: 0.72rem; color: var(--text2); margin-top: 4px; font-weight: 550; text-transform: uppercase; letter-spacing: 0.04em; }
+
+/* ===== Heatmap ===== */
+.heatmap-wrapper { overflow-x: auto; padding-bottom: 6px; text-align: center; -webkit-overflow-scrolling: touch; }
+.heatmap-grid { display: inline-grid; gap: 3.5px; }
+.heatmap-cell { width: 14px; height: 14px; border-radius: 3px; cursor: default; transition: transform 0.12s; }
+.heatmap-cell:hover { transform: scale(1.4); z-index: 1; outline: 1.5px solid rgba(0,0,0,0.35); border-radius: 3px; }
+.heatmap-cell.l0 { background: #e8eaed; }
+.heatmap-cell.l1 { background: #86e0a4; }
+.heatmap-cell.l2 { background: #2ea44f; }
+.heatmap-cell.lf { background: transparent; }
+.heatmap-cell.today-ring { outline: 2px solid var(--accent); outline-offset: -1px; border-radius: 3px; }
+.heatmap-year-nav { display: flex; align-items: center; justify-content: center; gap: 20px; margin-bottom: 14px; }
+.heatmap-year-nav .yr-btn { background: none; border: 1.5px solid var(--border); border-radius: 50%; width: 32px; height: 32px; cursor: pointer; font-size: 0.85rem; color: var(--text2); display: flex; align-items: center; justify-content: center; transition: all 0.15s; }
+.heatmap-year-nav .yr-btn:hover { background: var(--accent-light); color: var(--accent); border-color: var(--accent); }
+.heatmap-year-nav .yr-btn:disabled { opacity: 0.25; cursor: not-allowed; }
+.heatmap-year-nav .yr-label { font-size: 0.95rem; font-weight: 700; color: var(--text); min-width: 55px; text-align: center; }
+.heatmap-legend { display: flex; gap: 6px; align-items: center; justify-content: center; margin-top: 14px; font-size: 0.7rem; color: var(--text3); font-weight: 500; }
+.heatmap-legend span { margin: 0 4px; }
+
+/* ===== Calendar ===== */
+.calendar-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 18px; }
+.calendar-title { font-size: 0.95rem; font-weight: 700; color: var(--text); }
+.btn-nav { width: 34px; height: 34px; border: 1.5px solid var(--border); border-radius: 50%; background: var(--card); cursor: pointer; font-size: 0.9rem; display: flex; align-items: center; justify-content: center; transition: all 0.15s; color: var(--text2); }
+.btn-nav:hover { background: var(--accent-light); color: var(--accent); border-color: var(--accent); }
+.btn-nav:disabled { opacity: 0.25; cursor: not-allowed; }
+.calendar-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 2px; text-align: center; }
+.calendar-dow { font-size: 0.68rem; font-weight: 600; padding: 6px 0 10px; letter-spacing: 0.04em; color: var(--text2); }
+.calendar-dow.weekend { color: #e06060; }
+.calendar-cell { min-height: 52px; display: flex; flex-direction: column; align-items: center; justify-content: center; border-radius: 8px; font-size: 0.85rem; cursor: default; transition: all 0.15s; font-variant-numeric: tabular-nums; font-weight: 500; position: relative; padding: 4px 2px; }
+.calendar-cell:hover { background: var(--bg); }
+.calendar-cell.other-month { color: #d1d5db; }
+.calendar-cell.sunday .cal-num { color: #e04040; font-weight: 700; }
+.calendar-cell.saturday .cal-num { color: #7b9fd4; }
+.calendar-cell.holiday .cal-num { color: #e04040; font-weight: 700; }
+.calendar-cell.today { box-shadow: inset 0 0 0 2px var(--accent); }
+.calendar-cell.today .cal-num { color: var(--accent); font-weight: 700; }
+.calendar-cell.checked-in { background: var(--success-light); }
+.calendar-cell.checked-in .cal-num { color: var(--success-dark); font-weight: 700; }
+.calendar-cell.today.checked-in { box-shadow: inset 0 0 0 2px var(--success); }
+.cal-num { font-size: 0.88rem; line-height: 1.2; font-weight: 500; }
+.cal-holiday { font-size: 0.55rem; color: #e04040; line-height: 1.2; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%; margin-top: 1px; font-weight: 600; }
+.calendar-cell.checked-in .cal-holiday { color: var(--success-dark); }
+.calendar-legend { display: flex; gap: 18px; margin-top: 16px; font-size: 0.72rem; color: var(--text3); justify-content: center; font-weight: 500; }
+.legend-dot { display: inline-block; width: 9px; height: 9px; border-radius: 50%; margin-right: 4px; vertical-align: middle; }
+.legend-dot.checked { background: var(--success); }
+.legend-dot.today { background: var(--accent); }
+
+/* Dark mode calendar */
+[data-theme="dark"] .calendar-cell.sunday .cal-num { color: #f87171; }
+[data-theme="dark"] .calendar-cell.holiday .cal-num,
+[data-theme="dark"] .cal-holiday { color: #f87171; }
+[data-theme="dark"] .calendar-cell.saturday .cal-num { color: #6b9bd4; }
+
+/* ===== Settings Modal ===== */
+.modal-overlay { display: none; position: fixed; inset: 0; background: rgba(10,14,26,0.5); z-index: 100; align-items: center; justify-content: center; backdrop-filter: blur(3px); }
+.modal-overlay.open { display: flex; }
+.modal { background: var(--card); border-radius: 22px; padding: 28px 24px 24px; width: 90%; max-width: 440px; max-height: 85vh; overflow-y: auto; box-shadow: var(--shadow-lg); }
+.modal h2 { font-size: 1.1rem; margin-bottom: 22px; display: flex; justify-content: space-between; align-items: center; font-weight: 700; }
+.modal h3 { font-size: 0.8rem; font-weight: 650; color: var(--text3); margin: 20px 0 10px; padding-top: 16px; border-top: 1px solid var(--border); text-transform: uppercase; letter-spacing: 0.04em; }
+.modal h3:first-of-type { margin-top: 0; padding-top: 0; border-top: none; }
+.form-group { margin-bottom: 16px; }
+.form-group label { display: block; font-size: 0.82rem; font-weight: 600; color: var(--text2); margin-bottom: 6px; }
+.form-group input { width: 100%; padding: 11px 16px; border: 1.5px solid var(--border); border-radius: var(--radius-sm); font-size: 0.94rem; font-family: inherit; transition: all 0.15s; background: var(--bg); color: var(--text); }
+.form-group input:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px rgba(79,110,247,0.12); }
+.form-hint { font-size: 0.73rem; color: var(--text3); margin-top: 5px; }
+.btn-row { display: flex; gap: 10px; margin-top: 20px; }
+.btn { flex: 1; padding: 12px 20px; border-radius: 50px; font-size: 0.88rem; font-weight: 600; cursor: pointer; border: none; transition: all 0.15s; font-family: inherit; letter-spacing: 0.01em; }
+.btn-primary { background: var(--accent); color: #fff; }
+.btn-primary:hover { background: var(--accent-hover); }
+.btn-ghost { background: transparent; color: var(--text2); border: 1.5px solid var(--border); }
+.btn-ghost:hover { background: var(--bg); }
+.btn-danger { background: transparent; color: var(--danger); border: 1.5px solid #fecaca; font-size: 0.8rem; }
+.btn-danger:hover { background: #fef2f2; }
+.input-suffix { position: relative; }
+.input-suffix input { padding-right: 44px; }
+.input-suffix .suffix { position: absolute; right: 16px; top: 50%; transform: translateY(-50%); color: var(--text2); font-size: 0.85rem; pointer-events: none; font-weight: 600; }
+.export-section { display: flex; gap: 8px; }
+.export-info { font-size: 0.73rem; color: var(--text3); margin-top: 10px; text-align: center; }
+
+/* ===== Help Modal ===== */
+.help-content h3 { font-size: 0.88rem; font-weight: 700; color: var(--text); margin: 18px 0 6px; }
+.help-content h3:first-child { margin-top: 0; }
+.help-content p { font-size: 0.84rem; color: var(--text2); line-height: 1.75; margin-bottom: 4px; }
+.help-content code { background: var(--accent-light); color: var(--accent); padding: 2px 7px; border-radius: 5px; font-size: 0.8rem; font-family: "SF Mono", SFMono-Regular, Consolas, monospace; }
+.help-content b { color: var(--text); }
+
+/* ===== Toast ===== */
+.toast { position: fixed; bottom: 32px; left: 50%; transform: translateX(-50%) translateY(120px); background: var(--text); color: #fff; padding: 13px 28px; border-radius: 50px; font-size: 0.88rem; font-weight: 600; z-index: 200; opacity: 0; transition: all 0.4s cubic-bezier(0.18,0.89,0.32,1.05); pointer-events: none; white-space: nowrap; box-shadow: 0 8px 32px rgba(0,0,0,0.2); }
+.toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+/* ===== Dark Mode ===== */
+[data-theme="dark"] {
+    --bg: #0d1117; --card: #161b22; --text: #e6edf3; --text2: #8b949e; --text3: #5c6570;
+    --border: #30363d; --accent-light: #1a2340; --success-light: #0d2b1e;
+    --warning-light: #2b2110; --danger-light: #2b1116; --weekend: #131820;
+    --shadow: 0 1px 2px rgba(0,0,0,0.3); --shadow-md: 0 4px 12px rgba(0,0,0,0.4); --shadow-lg: 0 8px 32px rgba(0,0,0,0.5);
+}
+[data-theme="dark"] .card { border-color: #30363d; }
+[data-theme="dark"] .calendar-cell:hover { background: #1c2433; }
+[data-theme="dark"] .calendar-cell.other-month { color: #3a4350; }
+[data-theme="dark"] .calendar-cell.saturday .cal-num { color: #5b8bc4; }
+[data-theme="dark"] .discipline-item { background: #111820; }
+[data-theme="dark"] .discipline-item:hover { background: #1a2340; }
+[data-theme="dark"] .nw-form input,
+[data-theme="dark"] .checkin-note-input,
+[data-theme="dark"] .impulse-input,
+[data-theme="dark"] .form-group input { background: #0d1117; color: #e6edf3; border-color: #30363d; }
+[data-theme="dark"] .heatmap-cell.lf { background: transparent; }
+[data-theme="dark"] .heatmap-cell.l0 { background: #21262d; }
+[data-theme="dark"] .modal-overlay { background: rgba(0,0,0,0.7); }
+[data-theme="dark"] .btn-ghost:hover,
+[data-theme="dark"] .tab-btn:hover { background: #1c2433; }
+[data-theme="dark"] .tab-bar { border-color: #30363d; }
+#nw-chart { background: var(--bg); border-radius: 8px; }
+[data-theme="dark"] #nw-chart { background: #111820; }
+
+/* Theme Toggle */
+.theme-toggle { width: 38px; height: 38px; border: 1px solid var(--border); border-radius: 50%; background: var(--card); cursor: pointer; font-size: 1.1rem; display: flex; align-items: center; justify-content: center; transition: all 0.2s; color: var(--text2); margin-right: 8px; }
+.theme-toggle:hover { background: var(--bg); color: var(--accent); }
+.theme-toggle .icon { width: 1.1em; height: 1.1em; }
+
+
+/* ===== Confetti ===== */
+.confetti-container { position: fixed; inset: 0; pointer-events: none; z-index: 999; overflow: hidden; }
+.confetti-piece { position: absolute; width: 10px; height: 10px; top: -20px; animation: confetti-fall linear forwards; }
+@keyframes confetti-fall {
+    0% { transform: translateY(0) rotate(0deg); opacity: 1; }
+    100% { transform: translateY(100vh) rotate(720deg); opacity: 0; }
+}
+@keyframes celeb-in {
+    0% { transform: scale(0.3); opacity: 0; }
+    100% { transform: scale(1); opacity: 1; }
+}
+@keyframes celeb-pulse {
+    0% { transform: scale(0.5); }
+    60% { transform: scale(1.1); }
+    100% { transform: scale(1); }
+}
+@keyframes celeb-fadein {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* ===== Notification ===== */
+.notify-hint { font-size: 0.72rem; color: var(--text3); margin-top: 6px; }
+
+/* ===== PWA Banner ===== */
+.pwa-banner { display: none; position: fixed; bottom: 0; left: 0; right: 0; background: #131620; color: #e2e8f0; text-align: center; padding: 12px 20px; font-size: 0.84rem; z-index: 60; line-height: 1.5; }
+.pwa-banner.show { display: block; }
+.pwa-banner-close { margin-left: 12px; background: none; border: none; color: #94a3b8; cursor: pointer; font-size: 1rem; vertical-align: middle; }
+.pwa-banner-close:hover { color: #fff; }
+
+/* ===== Responsive ===== */
+@media (max-width: 480px) {
+    .container { padding: 10px 10px 40px; }
+    .countdown-number { font-size: 3.4rem; }
+    .countdown-breakdown { gap: 20px; }
+    .breakdown-value { font-size: 1.2rem; }
+    .card { padding: 18px 14px; border-radius: 16px; }
+    .compound-amount { font-size: 1.8rem; }
+    .compound-compare { gap: 28px; }
+    .stats-row { grid-template-columns: repeat(3, 1fr); gap: 8px; }
+    .stat-value { font-size: 1.25rem; }
+    .stat-label { font-size: 0.66rem; }
+    .calendar-cell { min-height: 42px; border-radius: 6px; }
+    .cal-num { font-size: 0.78rem; }
+    .cal-holiday { font-size: 0.5rem; }
+    .heatmap-cell { width: 10px; height: 10px; }
+    .heatmap-grid { gap: 2px; }
+    .btn-checkin { max-width: 100%; }
+    .discipline-text { font-size: 0.78rem; }
+    .discipline-modules { grid-template-columns: 1fr; gap: 10px; }
+    .dash-grid { grid-template-columns: 1fr 1fr; gap: 8px; }
+    .dash-val { font-size: 1.15rem; }
+    .nw-form { flex-wrap: wrap; }
+    .nw-form .nw-date { flex: 1; min-width: 0; }
+    .tab-btn { font-size: 0.78rem; padding: 10px 4px; }
+}
+</style>
+</head>
+<body>
+
+<div class="container">
+    <!-- Header -->
+    <div class="header">
+        <div>
+            <h1><span id="header-icon"></span> 10年计划 <span class="header-quote" id="daily-quote">载入中...</span></h1>
+        </div>
+        <div style="display:flex;align-items:center;">
+            <button class="theme-toggle" id="btn-theme" title="切换暗色模式" aria-label="切换主题"><span id="theme-icon"></span></button>
+            <button class="btn-icon" id="btn-help" title="帮助" aria-label="帮助"><span id="help-icon"></span></button>
+            <button class="btn-icon" id="btn-settings" title="设置" aria-label="打开设置"><span id="settings-icon"></span></button>
+        </div>
+    </div>
+
+    <!-- Tab Bar -->
+    <div class="tab-bar">
+        <button class="tab-btn active" data-tab="dashboard"><span id="tab-icon-dashboard"></span> 总览</button>
+        <button class="tab-btn" data-tab="overview"><span id="tab-icon-overview"></span> 概览</button>
+        <button class="tab-btn" data-tab="assets"><span id="tab-icon-assets"></span> 资产</button>
+        <button class="tab-btn" data-tab="history"><span id="tab-icon-history"></span> 记录</button>
+    </div>
+
+    <!-- Dashboard -->
+    <div class="card" data-tab="dashboard">
+        <div id="dash-status" style="text-align:center;margin-bottom:18px;"></div>
+        <div class="dash-grid" id="dash-grid"></div>
+    </div>
+
+    <!-- Countdown Hero -->
+    <div class="card countdown-hero" data-tab="overview">
+        <div class="countdown-number" id="days-remaining">--</div>
+        <div class="countdown-label" id="countdown-subtitle">剩余天数 · <span id="date-range-label">2026 – 2036</span></div>
+        <div class="countdown-breakdown">
+            <div class="breakdown-item"><div class="breakdown-value" id="bd-years">--</div><div class="breakdown-unit">年</div></div>
+            <div class="breakdown-item"><div class="breakdown-value" id="bd-months">--</div><div class="breakdown-unit">月</div></div>
+            <div class="breakdown-item"><div class="breakdown-value" id="bd-days">--</div><div class="breakdown-unit">天</div></div>
+        </div>
+    </div>
+
+    <!-- Progress -->
+    <div class="card progress-section" data-tab="overview">
+        <div class="progress-header">
+            <span class="progress-percent" id="progress-percent">0.00%</span>
+            <span class="progress-elapsed" id="progress-elapsed">已过 0 天</span>
+        </div>
+        <div class="progress-bar-outer"><div class="progress-bar-inner" id="progress-bar" style="width: 0%"></div></div>
+    </div>
+
+    <!-- Compound Target -->
+    <div class="card compound-hero" data-tab="overview">
+        <div class="section-title"><span id="title-icon-compound"></span> 复利目标看板</div>
+        <div class="compound-amount" id="compound-target">--</div>
+        <div class="compound-label" id="compound-label">当前月理论净值</div>
+        <div class="compound-compare">
+            <div class="compare-item"><div class="compare-val" id="cmp-init">--</div><div class="compare-lbl">初始本金</div></div>
+            <div class="compare-item"><div class="compare-val" id="cmp-final">--</div><div class="compare-lbl">10年目标</div></div>
+        </div>
+    </div>
+
+    <!-- Net Worth Tracking -->
+    <div class="card" data-tab="assets">
+        <div class="section-title"><span id="title-icon-nw"></span> 实际净值追踪</div>
+        <canvas id="nw-chart" width="560" height="220" style="width:100%;height:auto;margin-bottom:14px;border-radius:6px;"></canvas>
+        <div class="nw-compare" id="nw-compare">
+            <div class="nw-compare-value" id="nw-compare-val">--</div>
+            <div class="nw-compare-label" id="nw-compare-lbl">尚未记录实际净值</div>
+        </div>
+        <div class="nw-form">
+            <input type="number" class="nw-amount" id="nw-amount" placeholder="实际总金额" step="100">
+            <input type="date" class="nw-date" id="nw-date">
+            <button class="btn-sm" id="btn-nw-add">记录</button>
+        </div>
+        <table class="nw-table" id="nw-table">
+            <thead><tr><th>日期</th><th>实际净值</th><th>理论净值</th><th>差距</th><th></th></tr></thead>
+            <tbody id="nw-tbody"></tbody>
+        </table>
+    </div>
+
+    <!-- Asset Tracking -->
+    <div class="card" data-tab="assets">
+        <div class="section-title"><span id="title-icon-assets"></span> 资产分布</div>
+        <div class="asset-summary">
+            <div class="asset-total-label">总资产</div>
+            <div class="asset-total-value" id="asset-total">¥0</div>
+        </div>
+        <div style="display:flex;align-items:flex-start;gap:16px;flex-wrap:wrap;">
+            <canvas id="asset-pie" width="160" height="160" style="width:140px;height:140px;flex-shrink:0;"></canvas>
+            <div class="asset-legend" id="asset-legend" style="flex:1;min-width:140px;"></div>
+        </div>
+        <div class="asset-form" style="margin-top:12px;display:flex;gap:6px;flex-wrap:wrap;">
+            <select id="asset-cat" style="padding:8px 10px;border:1px solid var(--border);border-radius:var(--radius-sm);font-size:0.85rem;font-family:inherit;background:var(--card);color:var(--text);flex:1;min-width:100px;">
+                <option value="股票">📈 股票</option>
+                <option value="加密货币">🪙 加密货币</option>
+                <option value="现金">💵 现金/存款</option>
+                <option value="基金">📊 基金</option>
+                <option value="其他">📦 其他</option>
+            </select>
+            <input type="text" id="asset-name" placeholder="名称" style="padding:8px 10px;border:1px solid var(--border);border-radius:var(--radius-sm);font-size:0.85rem;font-family:inherit;background:var(--card);color:var(--text);flex:1;min-width:80px;">
+            <input type="number" id="asset-amount" placeholder="金额" step="100" style="padding:8px 10px;border:1px solid var(--border);border-radius:var(--radius-sm);font-size:0.85rem;font-family:inherit;background:var(--card);color:var(--text);width:100px;">
+            <button class="btn-sm" id="btn-asset-add">添加</button>
+        </div>
+        <canvas id="asset-growth-chart" width="560" height="180" style="width:100%;height:auto;margin-top:14px;border-radius:6px;"></canvas>
+        <div id="asset-list" style="margin-top:8px;font-size:0.82rem;"></div>
+    </div>
+
+    <!-- Daily Discipline + Check-in -->
+    <div class="card discipline-card" id="checkin-card" data-tab="today">
+        <div class="section-title"><span id="title-icon-disc"></span> 每日交易纪律</div>
+        <div class="discipline-modules">
+            <div class="disc-module">
+                <div class="disc-module-label"><span id="disc-stock-icon"></span> 股票</div>
+                <ul class="discipline-list" id="disc-list-stock"></ul>
+            </div>
+            <div class="disc-module">
+                <div class="disc-module-label"><span id="disc-futures-icon"></span> 期货</div>
+                <ul class="discipline-list" id="disc-list-futures"></ul>
+            </div>
+        </div>
+        <textarea class="checkin-note-input" id="checkin-note" placeholder="备注（选填）：今日操作心得..." rows="1"></textarea>
+        <div class="btn-checkin-wrap" id="checkin-action"></div>
+        <div id="checkin-streak"></div>
+    </div>
+
+    <!-- Impulse Log -->
+    <div class="card" data-tab="today">
+        <div class="section-title"><span id="title-icon-impulse"></span> 冲动交易日志</div>
+        <div class="impulse-form">
+            <input type="text" class="impulse-input" id="impulse-input" placeholder="记录冲动：想做什么操作？为什么？" maxlength="200">
+            <button class="btn-impulse" id="btn-impulse">记录并克制</button>
+        </div>
+        <div class="impulse-list" id="impulse-list"></div>
+        <div class="impulse-stats" id="impulse-stats"></div>
+    </div>
+
+    <!-- Stats -->
+    <div class="stats-row" data-tab="history">
+        <div class="stat-card"><div class="stat-value" id="stat-streak">0</div><div class="stat-label"><span id="stat-icon-streak"></span> 当前连续</div></div>
+        <div class="stat-card"><div class="stat-value" id="stat-best">0</div><div class="stat-label"><span id="stat-icon-best"></span> 最佳记录</div></div>
+        <div class="stat-card"><div class="stat-value" id="stat-rate">0%</div><div class="stat-label"><span id="stat-icon-rate"></span> 打卡率</div></div>
+    </div>
+
+    <!-- Heatmap -->
+    <div class="card" data-tab="history">
+        <div class="section-title"><span id="title-icon-heatmap"></span> 十年热力图</div>
+        <div class="heatmap-year-nav">
+            <button class="yr-btn" id="hm-prev" aria-label="上一年">◂</button>
+            <span class="yr-label" id="hm-year">2026</span>
+            <button class="yr-btn" id="hm-next" aria-label="下一年">▸</button>
+        </div>
+        <div class="heatmap-wrapper" id="heatmap-wrapper"></div>
+        <div class="heatmap-legend">
+            <span>灰色=未打卡</span>
+            <span style="margin:0 8px;">|</span>
+            <span>浅绿=已打卡</span>
+            <span style="margin:0 8px;">|</span>
+            <span>深绿=纪律全确认</span>
+        </div>
+    </div>
+
+    <!-- Calendar -->
+    <div class="card" data-tab="history">
+        <div class="calendar-header">
+            <button class="btn-nav" id="cal-prev" aria-label="上个月">◂</button>
+            <span class="calendar-title" id="cal-title">--</span>
+            <button class="btn-nav" id="cal-next" aria-label="下个月">▸</button>
+        </div>
+        <div class="calendar-grid" id="cal-dow"></div>
+        <div class="calendar-grid" id="cal-grid"></div>
+        <div class="calendar-legend">
+            <span><span class="legend-dot checked"></span>已打卡</span>
+            <span><span class="legend-dot today"></span>今天</span>
+        </div>
+    </div>
+</div>
+
+<!-- Settings Modal -->
+<div class="modal-overlay" id="modal-overlay">
+    <div class="modal">
+        <h2><span id="modal-settings-icon"></span> 设置 <button class="btn-icon" id="btn-close-modal" style="border:none;width:32px;height:32px;font-size:1rem;">✕</button></h2>
+        <h3>👤 个人信息</h3>
+        <div class="form-group"><label for="input-nickname">昵称</label><input type="text" id="input-nickname" placeholder="设置昵称后仪表盘会显示"></div>
+        <h3>📅 日期范围</h3>
+        <div class="form-group"><label for="input-start">开始日期</label><input type="date" id="input-start"></div>
+        <div class="form-group"><label for="input-end">结束日期</label><input type="date" id="input-end"><div class="form-hint">默认为开始日期 + 10年</div></div>
+        <h3>💰 复利参数</h3>
+        <div class="form-group"><label for="input-capital">初始本金 (元)</label><input type="number" id="input-capital" step="1000" min="0"></div>
+        <div class="form-group input-suffix"><label for="input-return">预期年化收益率</label><input type="number" id="input-return" step="0.5" min="0" max="200"><span class="suffix">%</span></div>
+        <h3>📋 交易纪律</h3>
+        <div class="form-hint" style="margin-bottom:10px;">📈 股票纪律</div>
+        <div class="form-group"><input type="text" id="input-s1" placeholder="股票纪律 1"></div>
+        <div class="form-group"><input type="text" id="input-s2" placeholder="股票纪律 2"></div>
+        <div class="form-group"><input type="text" id="input-s3" placeholder="股票纪律 3"></div>
+        <div class="form-hint" style="margin-bottom:10px;margin-top:14px;">📉 期货纪律</div>
+        <div class="form-group"><input type="text" id="input-f1" placeholder="期货纪律 1"></div>
+        <div class="form-group"><input type="text" id="input-f2" placeholder="期货纪律 2"></div>
+        <div class="form-group"><input type="text" id="input-f3" placeholder="期货纪律 3"></div>
+        <h3>🔔 每日提醒</h3>
+        <div class="form-group"><label for="input-reminder">提醒时间（工作日到点弹通知）</label><input type="time" id="input-reminder"><div class="notify-hint" id="notify-hint"></div></div>
+        <h3>🎉 里程碑庆祝</h3>
+        <div class="form-group"><label for="input-milestone">进度每增长多少 % 庆祝一次</label><input type="number" id="input-milestone" min="1" max="50" step="1"><div class="form-hint">默认 5%，设为 1% 最密集，设为 0 关闭进度庆祝</div></div>
+        <div class="form-group"><label for="input-confetti">纸屑动画时长 (秒)</label><input type="number" id="input-confetti" min="2" max="30" step="1"><div class="form-hint">默认 6 秒</div></div>
+        <div class="btn-row">
+            <button class="btn btn-primary" id="btn-save-settings">保存设置</button>
+            <button class="btn btn-ghost" id="btn-reset-settings">恢复默认</button>
+        </div>
+        <h3>💾 数据备份</h3>
+        <div class="export-section">
+            <button class="btn btn-ghost" id="btn-export" style="flex:1;">📥 导出备份</button>
+            <button class="btn btn-ghost" id="btn-import" style="flex:1;">📤 恢复备份</button>
+        </div>
+        <input type="file" id="import-file" accept=".json" style="display:none;">
+        <div class="export-info" id="export-info"></div>
+        <div class="btn-row" style="margin-top:8px;">
+            <button class="btn btn-danger" id="btn-reset-data">🗑 清除所有数据</button>
+        </div>
+    </div>
+</div>
+
+<!-- PWA Banner -->
+<div class="pwa-banner" id="pwa-banner">
+    💡 双击 <strong>启动服务器.bat</strong> 即可安装为桌面应用
+    <button class="pwa-banner-close" onclick="this.parentElement.classList.remove('show')" aria-label="关闭">✕</button>
+</div>
+
+<!-- Help Modal -->
+<div class="modal-overlay" id="help-overlay">
+    <div class="modal" style="max-width:560px;max-height:85vh;overflow-y:auto;">
+        <h2>📖 软件说明 <button class="btn-icon" id="btn-close-help" style="border:none;width:32px;height:32px;font-size:1rem;">✕</button></h2>
+        <div class="help-content" id="help-content"></div>
+    </div>
+</div>
+
+<!-- Confetti -->
+<div class="confetti-container" id="confetti"></div>
+
+<!-- Toast -->
+<div class="toast" id="toast"></div>
+
+<script>
+// ============================================================
+// 10年计划 V3 — +净值追踪 +格言 +备份
+// ============================================================
+
+const STORAGE_KEY = 'ten-year-plan-v3';
+const DEFAULT_YEARS = 10;
+
+// ===================== Defaults =====================
+const DEFAULT_STOCK = [
+    '严格执行计划',
+    '不买A股个股',
+    '大部分资金投入美股'
+];
+const DEFAULT_FUTURES = [
+    '今日不手动干预期货程序化交易',
+    '今日严格按期货策略止损止盈',
+    '今日不盯期货盘、不冲动操作'
+];
+
+const MAXIMS = [
+'不做任何操作，就是最好的操作。',
+'复利的第一条规则：永远不要打断它。',
+'你赚的不是操作的钱，是等待的钱。',
+'市场会奖励耐心，惩罚冲动。',
+'每次想手动干预时，问自己：程序错了吗？还是你只是无聊？',
+'十年后你会感谢今天没有乱动的自己。',
+'财富自由 = 策略 × 时间 × 纪律³',
+'盯盘是最大的隐性成本。',
+'真正的交易高手，99%的时间什么都不做。',
+'冲动是利润的敌人，纪律是复利的朋友。',
+'程序在执行策略，你的任务是别打扰它。',
+'亏损不可怕，可怕的是因为无聊而亏损。',
+'每忍住一次冲动，就离自由更近一步。',
+'复利像滚雪球，乱动只会把雪球摔碎。',
+'十年很长，但每天只需要做一件事：别乱动。',
+'交易中最难的不是判断方向，是坐着不动。',
+'你的程序比你更理性，相信它。',
+'频繁交易是券商最好的朋友，是你最大的敌人。',
+'时间是好策略的朋友，坏策略的敌人。',
+'今天的克制 = 十年后的自由。',
+'市场不缺机会，缺的是等得起的耐心。',
+'复利曲线前8年很慢，后2年爆发——别在第7年放弃。',
+'情绪是交易的天敌，纪律是唯一的解药。',
+'你不需要每天都赚钱，你需要每天都遵守规则。',
+'十年后回看，那些让你心痒的K线都不重要了。',
+];
+
+// SVG 图标库 — 统一线性风格，24px 网格，1.75px 描边
+const I = {
+    cat: '<svg class="icon accent" viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3.5-7.5 10-7.5S22 12 22 12s-3.5 7.5-10 7.5S2 12 2 12z"/><circle cx="12" cy="12" r="3.5" fill="currentColor" stroke="none"/></svg>',
+    target: '<svg class="icon accent" viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9.5"/><circle cx="12" cy="12" r="5.5"/><circle cx="12" cy="12" r="1.8"/></svg>',
+    eye: '<svg class="icon" viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><ellipse cx="12" cy="12" rx="10" ry="8.2"/><circle cx="12" cy="12" r="2.8"/><line x1="2" y1="12" x2="5.5" y2="12"/><line x1="18.5" y1="12" x2="22" y2="12"/></svg>',
+    check: '<svg class="icon" viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="4"/><polyline points="7.5 12.5 10.5 15.5 16.5 9"/></svg>',
+    chart: '<svg class="icon" viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="12" width="4" height="8" rx="1"/><rect x="10" y="6" width="4" height="14" rx="1"/><rect x="17" y="9" width="4" height="11" rx="1"/></svg>',
+    dollar: '<svg class="icon" viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9.5"/><path d="M12 6.5v11"/><path d="M9.5 9.5c0-1 1-1.8 2.5-1.8s2.5.8 2.5 1.8-1 1.6-2.5 1.6-2.5.8-2.5 1.8 1 1.8 2.5 1.8 2.5-.8 2.5-1.8"/></svg>',
+    shield: '<svg class="icon" viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2L3 6v5.5c0 5.5 3.8 9.7 9 11.5 5.2-1.8 9-6 9-11.5V6L12 2z"/><polyline points="8 12 11 15 16 9"/></svg>',
+    pause: '<svg class="icon" viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9.5"/><rect x="9" y="8.5" width="2.2" height="7" rx="1.1"/><rect x="12.8" y="8.5" width="2.2" height="7" rx="1.1"/></svg>',
+    flame: '<svg class="icon warning" viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2C9 6 6.5 8.5 6.5 13a5.5 5.5 0 0 0 11 0c0-4.5-2.5-7-5.5-11z"/><path d="M12 18.5a5.5 5.5 0 0 1-5.5-5.5c0-1.5.5-2.8 1.2-3.8"/><path d="M9.5 9.5c.8-.7 1.7-1.2 2.5-1.5"/></svg>',
+    star: '<svg class="icon warning" viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l2.8 6.5L22 9.5l-5 5.2 1.5 7.3-6.5-3.8-6.5 3.8L7 14.7l-5-5.2 7.2-1L12 2z"/></svg>',
+    trending: '<svg class="icon" viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 17 9 11 13 15 21 7"/><polyline points="15 7 21 7 21 13"/></svg>',
+    grid: '<svg class="icon" viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7.5" height="7.5" rx="1.8"/><rect x="13.5" y="3" width="7.5" height="7.5" rx="1.8"/><rect x="3" y="13.5" width="7.5" height="7.5" rx="1.8"/><rect x="13.5" y="13.5" width="7.5" height="7.5" rx="1.8"/></svg>',
+    cal: '<svg class="icon" viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4.5" width="18" height="16.5" rx="3"/><line x1="3" y1="11" x2="21" y2="11"/><line x1="8" y1="2.5" x2="8" y2="6.5"/><line x1="16" y1="2.5" x2="16" y2="6.5"/></svg>',
+    gear: '<svg class="icon" viewBox="0 0 24 24" fill="none" stroke-width="2.5" stroke-linecap="round"><circle cx="12" cy="12" r="8.5" stroke-dasharray="6 4.2" stroke-width="3.5"/><circle cx="12" cy="12" r="6" stroke-width="1.8"/><circle cx="12" cy="12" r="2.5" fill="currentColor" stroke="none" opacity="0.25"/></svg>',
+    clock: '<svg class="icon accent" viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9.5"/><polyline points="12 6.5 12 12 15.5 14.5"/></svg>',
+    sun: '<svg class="icon" viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>',
+    moon: '<svg class="icon" viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>',
+    contrast: '<svg class="icon" viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9.5"/><path d="M12 2.5v19"/><circle cx="12" cy="12" r="7" fill="currentColor" opacity="0.15"/></svg>',
+    bell: '<svg class="icon" viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M13.7 4.3A5.5 5.5 0 0 0 9 8c0 6-3 8.5-3 8.5h12s-3-2.5-3-8.5a5.5 5.5 0 0 0-1.3-3.7z"/><path d="M10.3 20.5a2.2 2.2 0 0 0 3.4 0"/></svg>',
+    help: '<svg class="icon" viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9.5"/><circle cx="12" cy="18" r="0.6" fill="currentColor" stroke="none"/><path d="M12 14.5v-.5c0-1.5 2-1.8 2-3.5a2 2 0 0 0-4 0"/></svg>',
+    home: '<svg class="icon" viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>',
+};
+
+function getDefaultData() {
+    const today = dateStr(new Date());
+    const end = new Date();
+    end.setFullYear(end.getFullYear() + DEFAULT_YEARS);
+    return {
+        startDate: today,
+        endDate: dateStr(end),
+        checkins: {},
+        impulseLog: [],
+        networthLog: [],
+        assets: [],
+        assetHistory: [],
+        capital: 100000,
+        annualReturn: 30,
+        stockDisciplines: [...DEFAULT_STOCK],
+        futuresDisciplines: [...DEFAULT_FUTURES],
+        reminderTime: '',
+        nickname: '',
+        celebrated: [],
+        confettiDuration: 6,
+        milestoneInterval: 5
+    };
+}
+
+// ===================== Storage =====================
+function loadData() {
+    try {
+        const raw = localStorage.getItem(STORAGE_KEY);
+        if (!raw) return getDefaultData();
+        const data = JSON.parse(raw);
+        if (!data.startDate || !data.endDate || !data.checkins) return getDefaultData();
+
+        let migrated = false;
+        // 迁移旧打卡格式
+        for (const [date, value] of Object.entries(data.checkins)) {
+            if (typeof value === 'string' || typeof value === 'number') {
+                data.checkins[date] = { time: String(value), disciplines: [true, true, true], note: '' };
+                migrated = true;
+            } else if (typeof value === 'object') {
+                if (!value.disciplines) { value.disciplines = [true, true, true]; migrated = true; }
+                if (value.note === undefined) { value.note = ''; migrated = true; }
+            }
+        }
+        if (!data.impulseLog) { data.impulseLog = []; migrated = true; }
+        if (!data.networthLog) { data.networthLog = []; migrated = true; }
+        if (!data.assets) { data.assets = []; migrated = true; }
+        if (!data.assetHistory) { data.assetHistory = []; migrated = true; }
+        if (data.capital === undefined) { data.capital = 100000; migrated = true; }
+        if (data.annualReturn === undefined) { data.annualReturn = 30; migrated = true; }
+        if (!data.stockDisciplines && data.disciplineItems) { data.stockDisciplines = [...data.disciplineItems]; data.futuresDisciplines = [...data.disciplineItems]; migrated = true; }
+        if (!data.stockDisciplines) { data.stockDisciplines = [...DEFAULT_STOCK]; migrated = true; }
+        if (!data.futuresDisciplines) { data.futuresDisciplines = [...DEFAULT_FUTURES]; migrated = true; }
+        // 迁移旧打卡记录
+        for (const [date, cd] of Object.entries(data.checkins)) {
+            if (cd && cd.disciplines && !cd.stockConfirmed) {
+                cd.stockConfirmed = [...cd.disciplines];
+                cd.futuresConfirmed = [...cd.disciplines];
+                delete cd.disciplines;
+                migrated = true;
+            }
+        }
+        if (data.reminderTime === undefined) { data.reminderTime = ''; migrated = true; }
+        if (!data.celebrated) { data.celebrated = []; migrated = true; }
+        if (data.confettiDuration === undefined) { data.confettiDuration = 6; migrated = true; }
+        if (data.nickname === undefined) { data.nickname = ''; migrated = true; }
+        if (data.milestoneInterval === undefined) { data.milestoneInterval = 5; migrated = true; }
+
+        if (migrated) saveData(data);
+        return data;
+    } catch (e) { return getDefaultData(); }
+}
+
+function saveData(data) {
+    try { localStorage.setItem(STORAGE_KEY, JSON.stringify(data)); }
+    catch (e) { showToast('⚠️ 存储空间不足'); }
+}
+
+// ===================== Date Utilities =====================
+function dateStr(d) { const y = d.getFullYear(); const m = String(d.getMonth()+1).padStart(2,'0'); const day = String(d.getDate()).padStart(2,'0'); return `${y}-${m}-${day}`; }
+function parseDate(str) { const [y, m, d] = str.split('-').map(Number); return new Date(y, m-1, d); }
+function todayStr() { return dateStr(new Date()); }
+function isWeekend(ds) { const d = parseDate(ds); return d.getDay()===0 || d.getDay()===6; }
+function dayName(ds) { return ['星期日','星期一','星期二','星期三','星期四','星期五','星期六'][parseDate(ds).getDay()]; }
+function daysBetween(d1, d2) { return Math.round((d2.getTime()-d1.getTime())/86400000); }
+function formatDateCN(ds) { const d = parseDate(ds); return `${d.getFullYear()}年${d.getMonth()+1}月${d.getDate()}日`; }
+function formatMoney(n) { return '¥'+Math.round(n).toLocaleString('zh-CN'); }
+function escapeHtml(str) { const d = document.createElement('div'); d.textContent = str; return d.innerHTML; }
+
+// ===================== Dashboard =====================
+function renderDashboard() {
+    const today = todayStr();
+    const cd = calcCountdown(appData.startDate, appData.endDate);
+    const cp = calcCompound(appData);
+    const nw = calcNetWorthCompare();
+    const totalAssets = calcAssetTotal();
+    const streak = calculateStreak(appData.checkins);
+    const rate = calculateRate(appData.checkins, appData.startDate);
+    const checked = isCheckedIn(today, appData);
+    const nickname = appData.nickname || '交易者';
+
+    // 状态条
+    const statusEl = document.getElementById('dash-status');
+    const greeting = `<div style="font-size:0.84rem;color:var(--text2);margin-bottom:10px;font-weight:500;">${nickname}，${checked?'今天做得不错':'新的一天加油'}</div>`;
+    if (isWeekend(today)) {
+        statusEl.innerHTML = greeting + `<span class="dash-status-weekend">${I.moon} 周末休息 · ${formatDateCN(today)}</span>`;
+    } else if (checked) {
+        statusEl.innerHTML = greeting + `<span class="dash-status-done">${I.check} 今日已打卡 · ${formatDateCN(today)}</span>
+            <div style="margin-top:8px;"><span onclick="undoCheckIn()" style="color:var(--text3);font-size:0.72rem;cursor:pointer;text-decoration:underline;">↩ 撤回打卡</span></div>`;
+    } else {
+        statusEl.innerHTML = greeting + `<button id="dash-go-checkin" style="border:none;background:var(--accent);color:#fff;padding:11px 30px;border-radius:50px;font-size:0.9rem;font-weight:600;cursor:pointer;font-family:inherit;display:inline-flex;align-items:center;gap:6px;">${I.check} 今日待打卡 — 点击前往</button>`;
+    }
+
+    // 本月克制次数
+    const now = new Date();
+    const thisMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+    let monthImpulse = 0;
+    (appData.impulseLog || []).forEach(item => {
+        if (parseDate(item.date) >= thisMonth) monthImpulse++;
+    });
+
+    const nwGap = nw ? nw.gap : 0;
+    const nwPct = nw ? nw.gapPct.toFixed(1) : '0';
+
+    const gapCls = nwGap>=0 ? 'success' : 'warn';
+    document.getElementById('dash-grid').innerHTML = `
+        <div class="dash-item accent">
+            <div class="dash-val">${cd.remainingTotalDays.toLocaleString()}<span style="font-size:0.7em;font-weight:500;color:var(--text3);"> 天</span></div>
+            <div class="dash-lbl">剩余时间</div>
+        </div>
+        <div class="dash-item accent">
+            <div class="dash-val">${cd.progress.toFixed(2)}<span style="font-size:0.7em;font-weight:500;color:var(--text3);">%</span></div>
+            <div class="dash-lbl">完成进度</div>
+        </div>
+        <div class="dash-item warn">
+            <div class="dash-val">${formatMoney(cp.currentTarget)}</div>
+            <div class="dash-lbl">理论净值 · 第${cp.monthsElapsed}个月</div>
+        </div>
+        <div class="dash-item ${gapCls}">
+            <div class="dash-val">${nw?formatMoney(nw.actual):'--'}</div>
+            <div class="dash-lbl">实际净值 · ${nw?(nwGap>=0?'超前':'落后')+' '+nwPct+'%':'未录入'}</div>
+        </div>
+        <div class="dash-item neutral">
+            <div class="dash-val">${formatMoney(totalAssets)}</div>
+            <div class="dash-lbl">总资产</div>
+        </div>
+        <div class="dash-item neutral">
+            <div class="dash-val">${streak}<span style="font-size:0.7em;font-weight:500;color:var(--text3);"> 天</span></div>
+            <div class="dash-lbl">连续打卡</div>
+        </div>
+        <div class="dash-item neutral">
+            <div class="dash-val">${monthImpulse}<span style="font-size:0.7em;font-weight:500;color:var(--text3);"> 次</span></div>
+            <div class="dash-lbl">本月克制冲动</div>
+        </div>
+        <div class="dash-item ${rate>=80?'success':'neutral'}">
+            <div class="dash-val">${rate}<span style="font-size:0.7em;font-weight:500;color:var(--text3);">%</span></div>
+            <div class="dash-lbl">打卡率</div>
+        </div>`;
+}
+
+// ===================== Countdown =====================
+function calcCountdown(startStr, endStr) {
+    const now = new Date();
+    const end = parseDate(endStr); end.setHours(23,59,59,999);
+    const start = parseDate(startStr); start.setHours(0,0,0,0);
+    const totalDays = daysBetween(start, end);
+    const elapsedDays = Math.max(0, daysBetween(start, now));
+    const remainingMs = Math.max(0, end.getTime()-now.getTime());
+    const remainingTotalDays = Math.ceil(remainingMs/86400000);
+    const progress = totalDays>0 ? Math.min(100, (elapsedDays/totalDays)*100) : 0;
+    let yrs = end.getFullYear()-now.getFullYear();
+    let mons = end.getMonth()-now.getMonth();
+    let dys = end.getDate()-now.getDate();
+    if (dys<0) { mons--; dys += new Date(end.getFullYear(), end.getMonth(), 0).getDate(); }
+    if (mons<0) { yrs--; mons+=12; }
+    if (yrs<0) { yrs=0; mons=0; dys=Math.max(0,remainingTotalDays); }
+    return { totalDays, elapsedDays, remainingTotalDays, progress, yrs, mons, dys };
+}
+
+// ===================== Compound Interest =====================
+function calcCompound(data) {
+    const now = new Date();
+    const start = parseDate(data.startDate);
+    const monthsElapsed = (now.getFullYear()-start.getFullYear())*12 + (now.getMonth()-start.getMonth());
+    const r = data.annualReturn/100;
+    const monthlyRate = Math.pow(1+r, 1/12)-1;
+    const currentTarget = data.capital * Math.pow(1+monthlyRate, Math.max(0, monthsElapsed));
+    const tenYearTarget = data.capital * Math.pow(1+r, 10);
+    return { monthsElapsed, currentTarget: Math.round(currentTarget), tenYearTarget: Math.round(tenYearTarget), monthlyRate };
+}
+
+function updateCompound() {
+    const cp = calcCompound(appData);
+    document.getElementById('compound-target').textContent = formatMoney(cp.currentTarget);
+    document.getElementById('compound-label').textContent = cp.monthsElapsed>=0 ? `第 ${cp.monthsElapsed} 个月理论净值` : '尚未开始';
+    document.getElementById('cmp-init').textContent = formatMoney(appData.capital);
+    document.getElementById('cmp-final').textContent = formatMoney(cp.tenYearTarget);
+}
+
+// ===================== Daily Quote =====================
+function getDailyMaxim() {
+    const dayOfYear = Math.floor((new Date() - new Date(new Date().getFullYear(),0,0)) / 86400000);
+    return MAXIMS[dayOfYear % MAXIMS.length];
+}
+
+function updateDailyQuote() {
+    document.getElementById('daily-quote').textContent = getDailyMaxim();
+}
+
+// ===================== Net Worth =====================
+function calcNetWorthCompare() {
+    const cp = calcCompound(appData);
+    const log = appData.networthLog || [];
+    if (log.length === 0) return null;
+    // 取最近一条记录
+    const latest = log[0];
+    const actual = latest.amount;
+    const theoretical = cp.currentTarget;
+    const gap = actual - theoretical;
+    const gapPct = theoretical>0 ? (gap/theoretical*100) : 0;
+    return { actual, theoretical, gap, gapPct, date: latest.date };
+}
+
+function addNetWorth() {
+    const amount = parseInt(document.getElementById('nw-amount').value);
+    const dateVal = document.getElementById('nw-date').value;
+
+    if (!amount || amount <= 0) { showToast('请输入有效的金额'); return; }
+    const date = dateVal || todayStr();
+    if (date > todayStr()) { showToast('不能记录未来日期'); return; }
+
+    // 检查是否同一天已有记录，有则更新
+    const existing = (appData.networthLog || []).findIndex(e => e.date === date);
+    if (existing >= 0) {
+        if (!confirm(`${date} 已有记录，是否更新为 ¥${amount.toLocaleString()}？`)) return;
+        appData.networthLog[existing].amount = amount;
+    } else {
+        appData.networthLog.unshift({ date, amount });
+        // 按日期倒序排列
+        appData.networthLog.sort((a, b) => b.date.localeCompare(a.date));
+        // 最多保留 200 条
+        if (appData.networthLog.length > 200) appData.networthLog = appData.networthLog.slice(0, 200);
+    }
+
+    saveData(appData);
+    document.getElementById('nw-amount').value = '';
+    renderNetWorth();
+    showToast('✅ 净值已记录');
+}
+
+function deleteNetWorth(index) {
+    appData.networthLog.splice(index, 1);
+    saveData(appData);
+    renderNetWorth();
+}
+
+function drawNetWorthChart() {
+    const canvas = document.getElementById('nw-chart');
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
+    const dpr = window.devicePixelRatio || 1;
+    const cssW = canvas.clientWidth || 560;
+    const cssH = 220;
+    canvas.width = cssW * dpr;
+    canvas.height = cssH * dpr;
+    canvas.style.width = cssW + 'px';
+    canvas.style.height = cssH + 'px';
+    ctx.scale(dpr, dpr);
+    const W = cssW, H = cssH;
+    const pad = { top: 20, right: 16, bottom: 30, left: 56 };
+    const pw = W - pad.left - pad.right;
+    const ph = H - pad.top - pad.bottom;
+    const dark = getDarkMode() === 'dark';
+    const gridColor = dark ? '#30363d' : '#e9ebef';
+    const textColor = dark ? '#5c6570' : '#9aa1af';
+
+    ctx.fillStyle = dark ? '#111820' : '#f4f5f7';
+    ctx.fillRect(0, 0, W, H);
+
+    const log = (appData.networthLog || []).slice().reverse(); // 按日期升序
+    if (log.length < 2) {
+        ctx.fillStyle = textColor;
+        ctx.font = '13px -apple-system, sans-serif';
+        ctx.textAlign = 'center';
+        ctx.fillText('录入两条以上记录后显示折线图', W/2, H/2);
+        return;
+    }
+
+    // 收集数据点
+    const points = log.map(item => {
+        const d = parseDate(item.date);
+        const months = (d.getFullYear()-parseDate(appData.startDate).getFullYear())*12 + (d.getMonth()-parseDate(appData.startDate).getMonth());
+        const r = appData.annualReturn/100;
+        const mr = Math.pow(1+r, 1/12)-1;
+        const theo = Math.round(appData.capital * Math.pow(1+mr, Math.max(0, months)));
+        return { date: item.date, actual: item.amount, theoretical: theo };
+    });
+
+    // 计算Y轴范围
+    const allVals = points.flatMap(p => [p.actual, p.theoretical]);
+    let yMin = Math.min(...allVals);
+    let yMax = Math.max(...allVals);
+    const yRange = yMax - yMin || 1;
+    yMin -= yRange * 0.1;
+    yMax += yRange * 0.1;
+    const ySpan = yMax - yMin;
+
+    // 辅助函数
+    const xPos = i => pad.left + (i / (points.length - 1)) * pw;
+    const yPos = v => pad.top + ph - ((v - yMin) / ySpan) * ph;
+
+    // 网格线 + Y轴标签
+    ctx.strokeStyle = gridColor;
+    ctx.lineWidth = 0.5;
+    ctx.fillStyle = textColor;
+    ctx.font = '11px -apple-system, sans-serif';
+    ctx.textAlign = 'right';
+    const gridLines = 5;
+    for (let i = 0; i <= gridLines; i++) {
+        const val = yMin + (ySpan * i / gridLines);
+        const y = yPos(val);
+        ctx.beginPath(); ctx.moveTo(pad.left, y); ctx.lineTo(W - pad.right, y); ctx.stroke();
+        ctx.fillText('¥' + (val/10000).toFixed(1) + '万', pad.left - 6, y + 4);
+    }
+
+    // X轴标签
+    ctx.textAlign = 'center';
+    ctx.fillStyle = textColor;
+    ctx.font = '10px -apple-system, sans-serif';
+    const maxLabels = Math.min(points.length, 8);
+    const step = Math.max(1, Math.floor((points.length - 1) / (maxLabels - 1)));
+    for (let i = 0; i < points.length; i += step) {
+        ctx.fillText(points[i].date.slice(5), xPos(i), H - pad.bottom + 16);
+    }
+    if ((points.length - 1) % step !== 0) {
+        ctx.fillText(points[points.length-1].date.slice(5), xPos(points.length-1), H - pad.bottom + 16);
+    }
+
+    // 理论线（虚线）
+    ctx.strokeStyle = '#3b82f6';
+    ctx.lineWidth = 1.5;
+    ctx.setLineDash([5, 3]);
+    ctx.beginPath();
+    points.forEach((p, i) => { const x = xPos(i), y = yPos(p.theoretical); i === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y); });
+    ctx.stroke();
+    ctx.setLineDash([]);
+
+    // 实际线（实线）
+    ctx.strokeStyle = '#10b981';
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    points.forEach((p, i) => { const x = xPos(i), y = yPos(p.actual); i === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y); });
+    ctx.stroke();
+
+    // 数据点
+    points.forEach((p, i) => {
+        ctx.fillStyle = '#10b981';
+        ctx.beginPath(); ctx.arc(xPos(i), yPos(p.actual), 3, 0, Math.PI*2); ctx.fill();
+        ctx.fillStyle = '#4f6ef7';
+        ctx.beginPath(); ctx.arc(xPos(i), yPos(p.theoretical), 2.5, 0, Math.PI*2); ctx.fill();
+    });
+
+    // 图例
+    const lx = W - pad.right - 160, ly = pad.top + 4;
+    ctx.fillStyle = '#10b981'; ctx.fillRect(lx, ly, 14, 3);
+    ctx.fillStyle = dark ? '#e6edf3' : '#1e293b';
+    ctx.font = 'bold 11px -apple-system, sans-serif'; ctx.textAlign = 'left';
+    ctx.fillText('实际净值', lx + 20, ly + 4);
+    ctx.setLineDash([5, 3]); ctx.strokeStyle = '#3b82f6'; ctx.lineWidth = 1.5;
+    ctx.beginPath(); ctx.moveTo(lx, ly + 16); ctx.lineTo(lx + 14, ly + 16); ctx.stroke();
+    ctx.setLineDash([]);
+    ctx.fillStyle = dark ? '#e6edf3' : '#1e293b'; ctx.font = 'bold 11px -apple-system, sans-serif';
+    ctx.fillText('理论净值', lx + 20, ly + 20);
+}
+
+function renderNetWorth() {
+    drawNetWorthChart();
+    const cmp = calcNetWorthCompare();
+    const compareEl = document.getElementById('nw-compare');
+    const cp = calcCompound(appData);
+
+    if (cmp) {
+        const isAhead = cmp.gap >= 0;
+        compareEl.className = 'nw-compare ' + (isAhead ? 'ahead' : 'behind');
+        document.getElementById('nw-compare-val').className = 'nw-compare-value ' + (isAhead ? 'ahead' : 'behind');
+        document.getElementById('nw-compare-val').textContent =
+            (isAhead ? '超前 +' : '落后 ') + formatMoney(Math.abs(cmp.gap)) + ` (${isAhead?'+':''}${cmp.gapPct.toFixed(1)}%)`;
+        document.getElementById('nw-compare-lbl').textContent =
+            `最近记录: ${cmp.date} | 实际 ${formatMoney(cmp.actual)} vs 理论 ${formatMoney(cmp.theoretical)}`;
+    } else {
+        compareEl.className = 'nw-compare';
+        document.getElementById('nw-compare-val').className = 'nw-compare-value';
+        document.getElementById('nw-compare-val').textContent = '--';
+        document.getElementById('nw-compare-lbl').textContent = '尚未记录实际净值，录入后可对比理论目标';
+    }
+
+    // 渲染列表
+    const tbody = document.getElementById('nw-tbody');
+    const log = appData.networthLog || [];
+    if (log.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;color:var(--text3);padding:16px;">暂无记录</td></tr>';
+    } else {
+        const recent = log.slice(0, 10);
+        tbody.innerHTML = recent.map((item, i) => {
+            const recordDate = parseDate(item.date);
+            const monthsElapsed = (recordDate.getFullYear()-parseDate(appData.startDate).getFullYear())*12 + (recordDate.getMonth()-parseDate(appData.startDate).getMonth());
+            const theoretical = Math.round(appData.capital * Math.pow(1+cp.monthlyRate, Math.max(0, monthsElapsed)));
+            const gap = item.amount - theoretical;
+            const gapPct = theoretical>0 ? (gap/theoretical*100) : 0;
+            const gapCls = gap>=0 ? 'gap-pos' : 'gap-neg';
+            const gapSign = gap>=0 ? '+' : '';
+            return `<tr>
+                <td>${item.date.slice(5)}</td>
+                <td>${formatMoney(item.amount)}</td>
+                <td>${formatMoney(theoretical)}</td>
+                <td class="${gapCls}">${gapSign}${formatMoney(Math.abs(gap))} (${gapSign}${gapPct.toFixed(1)}%)</td>
+                <td><button class="btn-del-sm" onclick="deleteNetWorth(${i})" title="删除">×</button></td>
+            </tr>`;
+        }).join('');
+    }
+
+    // 更新日期输入框默认值为今天
+    document.getElementById('nw-date').value = todayStr();
+}
+
+// ===================== Asset Tracking =====================
+const ASSET_COLORS = {
+    '股票': '#ef4444', '加密货币': '#f59e0b', '现金': '#3b82f6',
+    '基金': '#10b981', '其他': '#8b5cf6'
+};
+const ASSET_CATS = ['股票','加密货币','现金','基金','其他'];
+
+function calcAssetTotal() {
+    return (appData.assets || []).reduce((sum, a) => sum + (a.amount || 0), 0);
+}
+function calcAssetByCat() {
+    const map = {};
+    ASSET_CATS.forEach(c => { map[c] = 0; });
+    (appData.assets || []).forEach(a => { map[a.category] = (map[a.category] || 0) + a.amount; });
+    return map;
+}
+
+function drawAssetPie() {
+    const canvas = document.getElementById('asset-pie');
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
+    const dpr = window.devicePixelRatio || 1;
+    canvas.width = 160 * dpr; canvas.height = 160 * dpr; canvas.style.width = '140px'; canvas.style.height = '140px';
+    ctx.scale(dpr, dpr);
+    const W = 160, H = 160;
+    const cx = W/2, cy = H/2, r = Math.min(cx, cy) - 8;
+    ctx.clearRect(0, 0, W, H);
+
+    const byCat = calcAssetByCat();
+    const total = calcAssetTotal();
+    if (total === 0) {
+        ctx.fillStyle = '#d1d5db';
+        ctx.beginPath(); ctx.arc(cx, cy, r, 0, Math.PI*2); ctx.fill();
+        ctx.fillStyle = '#9ca3af'; ctx.font = '12px -apple-system, sans-serif'; ctx.textAlign = 'center';
+        ctx.fillText('暂无资产', cx, cy + 4);
+        // 中心小圆（甜甜圈效果）
+        ctx.fillStyle = getDarkMode() === 'dark' ? '#1e293b' : '#ffffff';
+        ctx.beginPath(); ctx.arc(cx, cy, r * 0.5, 0, Math.PI*2); ctx.fill();
+        return;
+    }
+
+    let angle = -Math.PI / 2;
+    ASSET_CATS.forEach(cat => {
+        const val = byCat[cat];
+        if (val <= 0) return;
+        const slice = (val / total) * Math.PI * 2;
+        ctx.fillStyle = ASSET_COLORS[cat];
+        ctx.beginPath();
+        ctx.moveTo(cx, cy);
+        ctx.arc(cx, cy, r, angle, angle + slice);
+        ctx.closePath();
+        ctx.fill();
+        angle += slice;
+    });
+
+    // 甜甜圈中心
+    ctx.fillStyle = getDarkMode() === 'dark' ? '#161b22' : '#ffffff';
+    ctx.beginPath(); ctx.arc(cx, cy, r * 0.5, 0, Math.PI*2); ctx.fill();
+    ctx.fillStyle = 'var(--text)';
+    ctx.font = 'bold 13px -apple-system, sans-serif';
+    ctx.textAlign = 'center';
+    ctx.fillText('¥' + (total/10000).toFixed(1) + '万', cx, cy + 5);
+}
+
+function renderAssetLegend() {
+    const el = document.getElementById('asset-legend');
+    const byCat = calcAssetByCat();
+    const total = calcAssetTotal();
+    el.innerHTML = ASSET_CATS.map(cat => {
+        const val = byCat[cat];
+        const pct = total > 0 ? (val / total * 100).toFixed(1) : '0';
+        return `<div class="asset-legend-item">
+            <div class="asset-legend-dot" style="background:${ASSET_COLORS[cat]}"></div>
+            <span class="asset-legend-name">${cat}</span>
+            <span class="asset-legend-val">¥${(val/10000).toFixed(1)}万 (${pct}%)</span>
+        </div>`;
+    }).join('');
+}
+
+function saveAssetSnapshot() {
+    const total = calcAssetTotal();
+    const today = todayStr();
+    const hist = appData.assetHistory || [];
+    // 同一天覆盖，否则追加
+    if (hist.length > 0 && hist[hist.length - 1].date === today) {
+        hist[hist.length - 1].total = total;
+    } else {
+        hist.push({ date: today, total });
+    }
+    if (hist.length > 500) hist.shift(); // 保留最近500条
+    appData.assetHistory = hist;
+    saveData(appData);
+}
+
+function drawAssetGrowthChart() {
+    const canvas = document.getElementById('asset-growth-chart');
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
+    const dpr = window.devicePixelRatio || 1;
+    const cssW = canvas.clientWidth || 560;
+    const cssH = 180;
+    canvas.width = cssW * dpr; canvas.height = cssH * dpr; canvas.style.width = cssW + 'px'; canvas.style.height = cssH + 'px';
+    ctx.scale(dpr, dpr);
+    const W = cssW, H = cssH;
+    const pad = { top: 14, right: 14, bottom: 26, left: 52 };
+    const pw = W - pad.left - pad.right;
+    const ph = H - pad.top - pad.bottom;
+    const dark = getDarkMode() === 'dark';
+    const gridC = dark ? '#30363d' : '#e9ebef';
+    const textC = dark ? '#5c6570' : '#9aa1af';
+
+    ctx.fillStyle = dark ? '#111820' : '#f4f5f7';
+    ctx.fillRect(0, 0, W, H);
+
+    const hist = appData.assetHistory || [];
+    if (hist.length < 2) {
+        ctx.fillStyle = textC;
+        ctx.font = '12px -apple-system, sans-serif';
+        ctx.textAlign = 'center';
+        ctx.fillText('增长曲线将在资产变动后自动生成', W/2, H/2);
+        return;
+    }
+
+    const vals = hist.map(h => h.total);
+    let yMin = Math.min(...vals) * 0.9;
+    let yMax = Math.max(...vals) * 1.1;
+    if (yMax === yMin) yMax = yMin + 10000;
+    const ySpan = yMax - yMin;
+    const xP = i => pad.left + (i / (hist.length - 1)) * pw;
+    const yP = v => pad.top + ph - ((v - yMin) / ySpan) * ph;
+
+    // 网格
+    ctx.strokeStyle = gridC; ctx.lineWidth = 0.5;
+    ctx.fillStyle = textC; ctx.font = '9px -apple-system, sans-serif'; ctx.textAlign = 'right';
+    for (let i = 0; i <= 4; i++) {
+        const v = yMin + ySpan * i / 4;
+        const y = yP(v);
+        ctx.beginPath(); ctx.moveTo(pad.left, y); ctx.lineTo(W - pad.right, y); ctx.stroke();
+        ctx.fillText('¥' + (v/10000).toFixed(1) + '万', pad.left - 4, y + 3);
+    }
+    // X轴
+    ctx.textAlign = 'center';
+    const step = Math.max(1, Math.floor((hist.length - 1) / 6));
+    for (let i = 0; i < hist.length; i += step) {
+        ctx.fillText(hist[i].date.slice(5), xP(i), H - pad.bottom + 14);
+    }
+    ctx.fillText(hist[hist.length-1].date.slice(5), xP(hist.length-1), H - pad.bottom + 14);
+
+    // 填充区域
+    ctx.fillStyle = dark ? 'rgba(79,110,247,0.12)' : 'rgba(79,110,247,0.08)';
+    ctx.beginPath();
+    hist.forEach((h, i) => { const x = xP(i); i === 0 ? ctx.moveTo(x, yP(yMin)) : ctx.lineTo(x, yP(yMin)); ctx.lineTo(x, yP(h.total)); });
+    ctx.lineTo(xP(hist.length-1), yP(yMin));
+    ctx.closePath(); ctx.fill();
+
+    // 折线
+    ctx.strokeStyle = '#4f6ef7'; ctx.lineWidth = 2;
+    ctx.beginPath();
+    hist.forEach((h, i) => { const x = xP(i), y = yP(h.total); i === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y); });
+    ctx.stroke();
+
+    // 数据点
+    ctx.fillStyle = '#4f6ef7';
+    hist.forEach((h, i) => { ctx.beginPath(); ctx.arc(xP(i), yP(h.total), 3, 0, Math.PI*2); ctx.fill(); });
+}
+
+function addAsset() {
+    const cat = document.getElementById('asset-cat').value;
+    const name = document.getElementById('asset-name').value.trim();
+    const amount = parseInt(document.getElementById('asset-amount').value);
+    if (!name) { showToast('请输入资产名称'); return; }
+    if (!amount || amount <= 0) { showToast('请输入有效金额'); return; }
+    appData.assets.push({ id: Date.now(), category: cat, name, amount });
+    saveAssetSnapshot();
+    document.getElementById('asset-name').value = '';
+    document.getElementById('asset-amount').value = '';
+    renderAssets();
+    showToast('✅ 资产已添加');
+}
+
+function deleteAsset(id) {
+    appData.assets = (appData.assets || []).filter(a => a.id !== id);
+    saveAssetSnapshot();
+    renderAssets();
+}
+
+function renderAssets() {
+    drawAssetPie();
+    drawAssetGrowthChart();
+    renderAssetLegend();
+    document.getElementById('asset-total').textContent = formatMoney(calcAssetTotal());
+
+    const listEl = document.getElementById('asset-list');
+    const assets = appData.assets || [];
+    if (assets.length === 0) {
+        listEl.innerHTML = '<div style="text-align:center;color:var(--text3);padding:12px;font-size:0.82rem;">暂无资产记录，添加你的各类资产吧</div>';
+        return;
+    }
+    listEl.innerHTML = assets.map(a => `
+        <div class="asset-item">
+            <span class="asset-item-cat" style="background:${ASSET_COLORS[a.category]}20;color:${ASSET_COLORS[a.category]}">${a.category}</span>
+            <span class="asset-item-name">${escapeHtml(a.name)}</span>
+            <span class="asset-item-amount">${formatMoney(a.amount)}</span>
+            <button class="asset-item-del" onclick="deleteAsset(${a.id})" title="删除">×</button>
+        </div>
+    `).join('');
+}
+
+// ===================== Discipline Check-in =====================
+function isCheckedIn(ds, data) { return ds in data.checkins; }
+function getCheckinData(ds, data) {
+    const v = data.checkins[ds]; if (!v) return null;
+    return typeof v==='object' ? v : { time: String(v), disciplines: [true,true,true], note: '' };
+}
+function allDisciplinesConfirmed(ds, data) {
+    const cd = getCheckinData(ds, data);
+    if (!cd) return false;
+    const sc = cd.stockConfirmed || cd.disciplines || [];
+    const fc = cd.futuresConfirmed || cd.disciplines || [];
+    return sc.every(Boolean) && fc.every(Boolean);
+}
+
+let stockState = [false, false, false];
+let futuresState = [false, false, false];
+
+function renderDisciplineList(listId, items, state, prefix) {
+    const listEl = document.getElementById(listId);
+    if (!listEl) return;
+    listEl.innerHTML = items.map((text, i) =>
+        `<li class="discipline-item" onclick="toggleDiscipline('${prefix}',${i})" id="disc-item-${prefix}-${i}">
+            <div class="discipline-checkbox" id="disc-cb-${prefix}-${i}"></div>
+            <span class="discipline-text">${escapeHtml(text)}</span>
+        </li>`
+    ).join('');
+    state.forEach((val, i) => {
+        if (val) {
+            const item = document.getElementById(`disc-item-${prefix}-${i}`);
+            const cb = document.getElementById(`disc-cb-${prefix}-${i}`);
+            if (item) item.classList.add('confirmed');
+            if (cb) cb.innerHTML = I.check;
+        }
+    });
+}
+
+function toggleDiscipline(prefix, idx) {
+    if (isCheckedIn(todayStr(), appData)) return;
+    const state = prefix === 'stock' ? stockState : futuresState;
+    state[idx] = !state[idx];
+    const item = document.getElementById(`disc-item-${prefix}-${idx}`);
+    const cb = document.getElementById(`disc-cb-${prefix}-${idx}`);
+    if (state[idx]) { item.classList.add('confirmed'); cb.innerHTML = I.check; }
+    else { item.classList.remove('confirmed'); cb.innerHTML = ''; }
+    updateCheckinBtn();
+}
+
+function updateCheckinBtn() {
+    const btn = document.getElementById('btn-checkin');
+    if (!btn) return;
+    const allOk = stockState.every(Boolean) && futuresState.every(Boolean);
+    btn.disabled = !allOk;
+    btn.innerHTML = allOk ? I.check + ' 确认并打卡' : (stockState.every(Boolean) ? '请确认期货纪律' : futuresState.every(Boolean) ? '请确认股票纪律' : '请确认全部纪律');
+}
+
+function updateCheckIn() {
+    const today = todayStr();
+    const weekend = isWeekend(today);
+    const checked = isCheckedIn(today, appData);
+
+    const modulesEl = document.querySelector('.discipline-modules');
+    const noteEl = document.getElementById('checkin-note');
+    if (weekend || checked) {
+        if (modulesEl) modulesEl.style.display = 'none';
+        if (noteEl) noteEl.style.display = 'none';
+    } else {
+        if (modulesEl) modulesEl.style.display = '';
+        if (noteEl) noteEl.style.display = '';
+        renderDisciplineList('disc-list-stock', appData.stockDisciplines, stockState, 'stock');
+        renderDisciplineList('disc-list-futures', appData.futuresDisciplines, futuresState, 'futures');
+    }
+
+    const actionEl = document.getElementById('checkin-action');
+    if (weekend) {
+        actionEl.innerHTML = `<div class="weekend-notice"><span class="emoji">${I.moon}</span>周末休息，下周继续加油！</div>`;
+    } else if (checked) {
+        const cd = getCheckinData(today, appData);
+        const stockTexts = (cd.stockConfirmed || []).map((ok, i) =>
+            `<span>${ok?I.check:''} ${escapeHtml(appData.stockDisciplines[i]||'')}</span>`
+        ).join('<br>');
+        const futuresTexts = (cd.futuresConfirmed || []).map((ok, i) =>
+            `<span>${ok?I.check:''} ${escapeHtml(appData.futuresDisciplines[i]||'')}</span>`
+        ).join('<br>');
+        actionEl.innerHTML = `
+            <div class="checkin-done">
+                <div class="checkin-done-badge"><span class="cm">✓</span>今日已完成打卡</div>
+                <div class="checkin-done-detail">${I.clock} ${cd.time}<br><b>${I.trending} 股票</b><br>${stockTexts}<br><b>${I.trending} 期货</b><br>${futuresTexts}</div>
+                ${cd.note ? `<div class="checkin-done-note">${escapeHtml(cd.note)}</div>` : ''}
+                <div class="checkin-maxim">${getDailyMaxim()}</div>
+                <div style="margin-top:10px;"><span onclick="undoCheckIn()" style="color:var(--text3);font-size:0.75rem;cursor:pointer;text-decoration:underline;">撤回打卡</span></div>
+            </div>`;
+    } else {
+        updateCheckinBtn();
+        actionEl.innerHTML = `<button class="btn-checkin" id="btn-checkin" onclick="doCheckIn()" disabled>${I.check} 请先确认全部纪律</button>`;
+    }
+
+    const streakEl = document.getElementById('checkin-streak');
+    if (weekend) { streakEl.innerHTML = ''; }
+    else if (checked) {
+        const s = calculateStreak(appData.checkins);
+        streakEl.innerHTML = s>0 ? `<div class="streak-badge">${I.flame} 连续打卡 <strong>${s}</strong> 天</div>` : '';
+    } else {
+        const s = calculateStreak(appData.checkins);
+        streakEl.innerHTML = s>0
+            ? `<div class="streak-badge">${I.flame} 连续打卡 <strong>${s}</strong> 天</div>`
+            : `<div style="margin-top:12px;font-size:0.85rem;color:var(--text3);">${I.star} 今天开始你的第一次打卡吧</div>`;
+    }
+}
+
+function undoCheckIn() {
+    if (!confirm('确定撤回今天的打卡吗？')) return;
+    delete appData.checkins[todayStr()];
+    saveData(appData);
+    showToast('已撤回，可以重新打卡');
+    refreshAll();
+}
+
+function doCheckIn() {
+    const today = todayStr();
+    if (isWeekend(today)) { showToast('今天是周末，休息吧 😊'); return; }
+    if (isCheckedIn(today, appData)) { showToast('今天已经打过卡了 😊'); return; }
+    if (!stockState.every(Boolean) || !futuresState.every(Boolean)) { showToast('请确认全部纪律后再打卡'); return; }
+
+    const now = new Date();
+    const time = `${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}`;
+    const note = document.getElementById('checkin-note').value.trim();
+    appData.checkins[today] = { time, stockConfirmed: [...stockState], futuresConfirmed: [...futuresState], note };
+    saveData(appData);
+    stockState = [false, false, false];
+    futuresState = [false, false, false];
+    showCheckinCelebration();
+    showToast('✅ 打卡成功！');
+    refreshAll();
+}
+
+// ===================== Impulse Log =====================
+function addImpulse() {
+    const input = document.getElementById('impulse-input');
+    const text = input.value.trim();
+    if (!text) { showToast('请输入冲动内容'); return; }
+    const now = new Date();
+    appData.impulseLog.unshift({
+        date: dateStr(now),
+        time: `${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}`,
+        text, resisted: true
+    });
+    if (appData.impulseLog.length > 200) appData.impulseLog = appData.impulseLog.slice(0, 200);
+    saveData(appData);
+    input.value = '';
+    renderImpulseLog();
+    showToast('🧘 已记录，冲动被克制了！');
+}
+
+function deleteImpulse(index) { appData.impulseLog.splice(index, 1); saveData(appData); renderImpulseLog(); }
+
+function renderImpulseLog() {
+    const listEl = document.getElementById('impulse-list');
+    const statsEl = document.getElementById('impulse-stats');
+    if (!appData.impulseLog || appData.impulseLog.length===0) {
+        listEl.innerHTML = `<div class="impulse-empty">${I.pause} 暂无记录。有冲动想法时，写下来就当释放了</div>`;
+        statsEl.innerHTML = ''; return;
+    }
+    listEl.innerHTML = appData.impulseLog.slice(0,15).map((item, i) => `
+        <div class="impulse-item">
+            <span class="impulse-item-time">${item.date.slice(5)} ${item.time}</span>
+            <span class="impulse-item-text">${escapeHtml(item.text)}</span>
+            <span class="impulse-item-badge resisted">已克制</span>
+            <button class="impulse-item-del" onclick="deleteImpulse(${i})" title="删除">×</button>
+        </div>`).join('');
+
+    const now = new Date();
+    const thisWeek = new Date(now); thisWeek.setDate(now.getDate()-now.getDay()+1); thisWeek.setHours(0,0,0,0);
+    const thisMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+    let wk=0, mt=0;
+    appData.impulseLog.forEach(item => {
+        const d = parseDate(item.date);
+        if (d>=thisWeek) wk++;
+        if (d>=thisMonth) mt++;
+    });
+    statsEl.innerHTML = `本周克制 <strong>${wk}</strong> 次 &nbsp;·&nbsp; 本月克制 <strong>${mt}</strong> 次`;
+}
+
+// ===================== Streak =====================
+function calculateStreak(checkins) {
+    let streak=0, safety=0; const d=new Date(); const today=dateStr(d);
+    while (safety<5000) { safety++;
+        const ds=dateStr(d); const dow=d.getDay();
+        if (dow===0||dow===6) { d.setDate(d.getDate()-1); continue; }
+        if (checkins[ds]) { streak++; d.setDate(d.getDate()-1); }
+        else { if (ds===today) { d.setDate(d.getDate()-1); continue; } break; }
+    }
+    return streak;
+}
+function calculateBestStreak(checkins, startDate) {
+    const start=parseDate(startDate); const end=new Date();
+    let best=0, cur=0; const d=new Date(start);
+    while (d<=end) {
+        const ds=dateStr(d); const dow=d.getDay();
+        if (dow===0||dow===6) { d.setDate(d.getDate()+1); continue; }
+        if (checkins[ds]) { cur++; if (cur>best) best=cur; }
+        else { cur=0; }
+        d.setDate(d.getDate()+1);
+    }
+    return best;
+}
+function calculateRate(checkins, startDate) {
+    const start=parseDate(startDate); const end=new Date();
+    let tot=0, chk=0; const d=new Date(start);
+    while (d<=end) {
+        const ds=dateStr(d); const dow=d.getDay();
+        if (dow!==0&&dow!==6) { tot++; if (checkins[ds]) chk++; }
+        d.setDate(d.getDate()+1);
+    }
+    return tot>0 ? Math.round((chk/tot)*100) : 0;
+}
+
+// ===================== Calendar =====================
+const HOLIDAYS_2026 = {
+    '01-01': '元旦','02-14': '情人节','03-08': '妇女节','04-01': '愚人节',
+    '04-05': '清明节','05-01': '劳动节','05-10': '母亲节','06-01': '儿童节',
+    '06-19': '端午节','06-21': '父亲节','08-01': '建军节','09-10': '教师节',
+    '09-25': '中秋节','10-01': '国庆节','10-31': '万圣节','11-26': '感恩节',
+    '12-25': '圣诞节','12-31': '跨年夜'
+};
+const HOLIDAYS_2027 = {
+    '01-01': '元旦','02-14': '情人节','03-08': '妇女节','04-01': '愚人节',
+    '04-05': '清明节','05-01': '劳动节','05-09': '母亲节','06-01': '儿童节',
+    '06-09': '端午节','06-20': '父亲节','08-01': '建军节','09-10': '教师节',
+    '09-15': '中秋节','10-01': '国庆节','10-31': '万圣节','11-25': '感恩节',
+    '12-25': '圣诞节','12-31': '跨年夜'
+};
+function getHoliday(dateStr) {
+    const mmdd = dateStr.slice(5);
+    const year = dateStr.slice(0,4);
+    if (year === '2026') return HOLIDAYS_2026[mmdd] || '';
+    if (year === '2027') return HOLIDAYS_2027[mmdd] || '';
+    return HOLIDAYS_2026[mmdd] || ''; // 通用节日fallback
+}
+
+let calYear, calMonth;
+
+function renderCalendar(data) {
+    const grid=document.getElementById('cal-grid');
+    const title=document.getElementById('cal-title');
+    // 周日开头的传统中国日历
+    document.getElementById('cal-dow').innerHTML = ['日','一','二','三','四','五','六'].map((d,i)=>{
+        return `<div class="calendar-dow${i===0||i===6?' weekend':''}">${d}</div>`;
+    }).join('');
+    const firstDay=new Date(calYear,calMonth,1);
+    const daysInMonth=new Date(calYear,calMonth+1,0).getDate();
+    const startDow=firstDay.getDay(); // 0=Sun
+    const prevLast=new Date(calYear,calMonth,0).getDate();
+    const today=todayStr();
+    title.textContent=`${calYear}年${calMonth+1}月`;
+
+    let html='';
+    // 上月尾巴
+    for (let i=startDow-1;i>=0;i--) {
+        const d=prevLast-i;
+        const ds=dateStr(new Date(calYear,calMonth-1,d));
+        html+=`<div class="calendar-cell other-month">${d}</div>`;
+    }
+    // 本月
+    for (let d=1;d<=daysInMonth;d++) {
+        const date=new Date(calYear,calMonth,d);
+        const ds=dateStr(date); const dow=date.getDay();
+        const isSun=dow===0, isSat=dow===6;
+        const holiday=getHoliday(ds);
+        const cls=['calendar-cell'];
+        if (isSun) cls.push('sunday');
+        else if (isSat) cls.push('saturday');
+        if (holiday) cls.push('holiday');
+        if (ds===today) cls.push('today');
+        if (isCheckedIn(ds,data)) cls.push('checked-in');
+        html+=`<div class="${cls.join(' ')}" title="${formatDateCN(ds)} ${dayName(ds)}${holiday?' 🎉'+holiday:''}${isCheckedIn(ds,data)?' ✓':''}">`;
+        html+=`<span class="cal-num">${d}</span>`;
+        if (holiday) html+=`<span class="cal-holiday">${holiday}</span>`;
+        html+=`</div>`;
+    }
+    // 下月填补
+    const totalCells=startDow+daysInMonth;
+    const remain=totalCells%7===0?0:7-(totalCells%7);
+    for (let d=1;d<=remain;d++) {
+        html+=`<div class="calendar-cell other-month">${d}</div>`;
+    }
+    grid.innerHTML=html;
+    const now=new Date();
+    document.getElementById('cal-prev').disabled=(calYear===2020&&calMonth===0);
+    document.getElementById('cal-next').disabled=(calYear>now.getFullYear())||(calYear===now.getFullYear()&&calMonth>=now.getMonth());
+}
+function initCalendar() { const now=new Date(); calYear=now.getFullYear(); calMonth=now.getMonth(); }
+
+// ===================== Heatmap =====================
+let hmYear;
+
+function renderHeatmap(year) {
+    const wrapper=document.getElementById('heatmap-wrapper');
+    const jan1=new Date(year,0,1); const dec31=new Date(year,11,31);
+    const startDow=jan1.getDay();
+    const daysToMonday=startDow===0?6:startDow-1;
+    const firstMonday=new Date(jan1); firstMonday.setDate(jan1.getDate()-daysToMonday);
+    const allWeeks=Math.ceil((daysBetween(firstMonday,dec31)+1)/7);
+    const today=todayStr();
+    const now=new Date();
+    const isCurrentYear = year === now.getFullYear();
+
+    const todayWeek = isCurrentYear ? Math.floor(daysBetween(firstMonday, now) / 7) : allWeeks - 1;
+    const weeks = Math.min(allWeeks, todayWeek + 1);
+    const cellSize = 14, gap = 3.5, step = cellSize + gap;
+
+    // 月份标签 — 简洁顶部
+    const monthPositions=[];
+    for (let m=0;m<12;m++) {
+        const d=new Date(year,m,1);
+        const col=Math.floor(daysBetween(firstMonday,d)/7);
+        if (col <= weeks) monthPositions.push({name:(m+1)+'月',col});
+    }
+    let mlHtml='<div style="height:14px;position:relative;margin-bottom:4px;">';
+    monthPositions.forEach((mp,i)=>{
+        const left=mp.col*step;
+        mlHtml+=`<span style="position:absolute;left:${left}px;font-size:0.62rem;color:var(--text3);font-weight:550;letter-spacing:0.02em;">${mp.name}</span>`;
+    });
+    mlHtml+='</div>';
+
+    // 5 行纯工作日
+    let gridHtml='';
+    for (let col=0;col<weeks;col++) {
+        for (let row=0;row<5;row++) {
+            const d=new Date(firstMonday); d.setDate(firstMonday.getDate()+col*7+row);
+            const ds=dateStr(d); let cls='heatmap-cell ';
+            if (d<jan1||d>dec31||d>now) { cls+='lf'; }
+            else if (isCheckedIn(ds,appData)) { cls+=allDisciplinesConfirmed(ds,appData)?'l2':'l1'; }
+            else { cls+='l0'; }
+            if (ds===today) cls+=' today-ring';
+            const title=d>=jan1&&d<=dec31?`${formatDateCN(ds)} ${dayName(ds)}${isCheckedIn(ds,appData)?(allDisciplinesConfirmed(ds,appData)?' ✅':' ✓'):' ✗'}`:'';
+            gridHtml+=`<div class="${cls}" title="${title}"></div>`;
+        }
+    }
+    wrapper.innerHTML=`<div style="display:inline-block;text-align:left;">${mlHtml}<div class="heatmap-grid" style="grid-template-columns:repeat(${weeks},${cellSize}px);grid-template-rows:repeat(5,${cellSize}px);">${gridHtml}</div></div>`;
+    document.getElementById('hm-year').textContent=`${year}年`;
+    document.getElementById('hm-prev').disabled=(year<=Math.max(2020,parseDate(appData.startDate).getFullYear()));
+    document.getElementById('hm-next').disabled=(year>=now.getFullYear());
+}
+function initHeatmap() { hmYear=new Date().getFullYear(); }
+
+// ===================== Export / Import =====================
+function exportData() {
+    const data = loadData(); // 读取最新数据
+    const json = JSON.stringify(data, null, 2);
+    const blob = new Blob([json], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    const now = dateStr(new Date());
+    a.download = `10年计划_备份_${now}.json`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+    updateExportInfo();
+    showToast('✅ 数据已导出');
+}
+
+function importData() {
+    const fileInput = document.getElementById('import-file');
+    fileInput.click();
+}
+
+function handleImport(event) {
+    const file = event.target.files[0];
+    if (!file) return;
+    if (!confirm('⚠️ 恢复备份将覆盖当前所有数据，确定继续？')) {
+        event.target.value = ''; return;
+    }
+    const reader = new FileReader();
+    reader.onload = function(e) {
+        try {
+            const data = JSON.parse(e.target.result);
+            if (!data.startDate || !data.endDate || !data.checkins) {
+                showToast('❌ 无效的备份文件');
+                return;
+            }
+            // 确保新字段存在
+            if (!data.impulseLog) data.impulseLog = [];
+            if (!data.networthLog) data.networthLog = [];
+            if (data.capital === undefined) data.capital = 100000;
+            if (data.annualReturn === undefined) data.annualReturn = 30;
+            if (!data.disciplineItems) data.disciplineItems = [...DEFAULT_DISCIPLINES];
+
+            saveData(data);
+            appData = data;
+            disciplineState = [false, false, false];
+            refreshAll();
+            updateExportInfo();
+            showToast('✅ 数据已恢复');
+        } catch (err) {
+            showToast('❌ 文件格式错误');
+        }
+    };
+    reader.readAsText(file);
+    event.target.value = '';
+}
+
+function updateExportInfo() {
+    const data = loadData();
+    const checkinCount = Object.keys(data.checkins).length;
+    const impulseCount = (data.impulseLog || []).length;
+    const nwCount = (data.networthLog || []).length;
+    document.getElementById('export-info').textContent =
+        `当前数据：${checkinCount} 次打卡 · ${impulseCount} 条日志 · ${nwCount} 条净值记录`;
+}
+
+// ===================== UI Updates =====================
+let appData;
+
+function refreshAll() {
+    appData = loadData();
+    updateCountdown();
+    updateProgress();
+    updateCompound();
+    updateDailyQuote();
+    updateCheckIn();
+    renderNetWorth();
+    renderAssets();
+    renderImpulseLog();
+    updateStats();
+    renderHeatmap(hmYear);
+    renderCalendar(appData);
+    updateDateRange();
+    updateExportInfo();
+    renderDashboard();
+    checkMilestone();
+    checkReminder();
+}
+
+function updateCountdown() {
+    const cd = calcCountdown(appData.startDate, appData.endDate);
+    document.getElementById('days-remaining').textContent = cd.remainingTotalDays.toLocaleString();
+    document.getElementById('countdown-subtitle').textContent = cd.progress>=100 ? '🎉 计划已完成！' : '剩余天数';
+    document.getElementById('bd-years').textContent = cd.yrs;
+    document.getElementById('bd-months').textContent = cd.mons;
+    document.getElementById('bd-days').textContent = cd.dys;
+    document.title = cd.progress<100 ? `${cd.remainingTotalDays}天 · 10年计划` : '🎉 计划完成 · 10年计划';
+}
+
+function updateProgress() {
+    const cd = calcCountdown(appData.startDate, appData.endDate);
+    document.getElementById('progress-percent').textContent = cd.progress.toFixed(2)+'%';
+    document.getElementById('progress-elapsed').textContent = `已过 ${cd.elapsedDays.toLocaleString()} 天 / 共 ${cd.totalDays.toLocaleString()} 天`;
+    const bar = document.getElementById('progress-bar');
+    bar.style.width = cd.progress.toFixed(2)+'%';
+    bar.classList.toggle('complete', cd.progress>=100);
+}
+
+function updateStats() {
+    document.getElementById('stat-streak').textContent = calculateStreak(appData.checkins);
+    document.getElementById('stat-best').textContent = calculateBestStreak(appData.checkins, appData.startDate);
+    document.getElementById('stat-rate').textContent = calculateRate(appData.checkins, appData.startDate)+'%';
+}
+
+function updateDateRange() {
+    const el = document.getElementById('date-range-label');
+    if (el) el.textContent = `${parseDate(appData.startDate).getFullYear()} – ${parseDate(appData.endDate).getFullYear()}`;
+}
+
+// ===================== Settings =====================
+function openSettings() {
+    document.getElementById('input-nickname').value = appData.nickname || '';
+    document.getElementById('input-start').value = appData.startDate;
+    document.getElementById('input-end').value = appData.endDate;
+    document.getElementById('input-capital').value = appData.capital;
+    document.getElementById('input-return').value = appData.annualReturn;
+    document.getElementById('input-s1').value = appData.stockDisciplines[0]||'';
+    document.getElementById('input-s2').value = appData.stockDisciplines[1]||'';
+    document.getElementById('input-s3').value = appData.stockDisciplines[2]||'';
+    document.getElementById('input-f1').value = appData.futuresDisciplines[0]||'';
+    document.getElementById('input-f2').value = appData.futuresDisciplines[1]||'';
+    document.getElementById('input-f3').value = appData.futuresDisciplines[2]||'';
+    document.getElementById('input-reminder').value = appData.reminderTime || '';
+    document.getElementById('input-milestone').value = appData.milestoneInterval || 5;
+    document.getElementById('input-confetti').value = appData.confettiDuration || 6;
+    checkNotifyPermission();
+    updateExportInfo();
+    document.getElementById('modal-overlay').classList.add('open');
+}
+function closeSettings() { document.getElementById('modal-overlay').classList.remove('open'); }
+
+function saveSettings() {
+    appData.nickname = document.getElementById('input-nickname').value.trim();
+    const newStart=document.getElementById('input-start').value;
+    let newEnd=document.getElementById('input-end').value;
+    const newCap=parseInt(document.getElementById('input-capital').value)||0;
+    const newRet=parseFloat(document.getElementById('input-return').value)||0;
+    const s1=document.getElementById('input-s1').value.trim();
+    const s2=document.getElementById('input-s2').value.trim();
+    const s3=document.getElementById('input-s3').value.trim();
+    const f1=document.getElementById('input-f1').value.trim();
+    const f2=document.getElementById('input-f2').value.trim();
+    const f3=document.getElementById('input-f3').value.trim();
+    if (!newStart) { showToast('请选择开始日期'); return; }
+    if (!newEnd) { const e=parseDate(newStart); e.setFullYear(e.getFullYear()+DEFAULT_YEARS); newEnd=dateStr(e); }
+    if (newEnd<=newStart) { showToast('结束日期必须晚于开始日期'); return; }
+    if (newCap<=0) { showToast('本金必须大于0'); return; }
+    if (newRet<0) { showToast('收益率不能为负'); return; }
+    if (newStart!==appData.startDate||newEnd!==appData.endDate) {
+        if (Object.keys(appData.checkins).length>0 && !confirm('修改日期范围将保留已有打卡记录。确定继续？')) return;
+    }
+    appData.startDate=newStart; appData.endDate=newEnd;
+    appData.capital=newCap; appData.annualReturn=newRet;
+    appData.stockDisciplines=[s1||DEFAULT_STOCK[0], s2||DEFAULT_STOCK[1], s3||DEFAULT_STOCK[2]];
+    appData.futuresDisciplines=[f1||DEFAULT_FUTURES[0], f2||DEFAULT_FUTURES[1], f3||DEFAULT_FUTURES[2]];
+    appData.reminderTime = document.getElementById('input-reminder').value;
+    appData.milestoneInterval = parseInt(document.getElementById('input-milestone').value) || 5;
+    appData.confettiDuration = parseInt(document.getElementById('input-confetti').value) || 6;
+    if (appData.reminderTime && !notifyPermitted) requestNotifyPermission();
+    saveData(appData); closeSettings();
+    stockState=[false,false,false]; futuresState=[false,false,false]; refreshAll();
+    showToast('✅ 设置已保存');
+}
+
+function resetSettings() {
+    const def=getDefaultData();
+    document.getElementById('input-start').value=def.startDate; document.getElementById('input-end').value=def.endDate;
+    document.getElementById('input-capital').value=def.capital; document.getElementById('input-return').value=def.annualReturn;
+    document.getElementById('input-s1').value=def.stockDisciplines[0]; document.getElementById('input-s2').value=def.stockDisciplines[1]; document.getElementById('input-s3').value=def.stockDisciplines[2];
+    document.getElementById('input-f1').value=def.futuresDisciplines[0]; document.getElementById('input-f2').value=def.futuresDisciplines[1]; document.getElementById('input-f3').value=def.futuresDisciplines[2];
+    showToast('已恢复默认设置');
+}
+
+function resetAllData() {
+    if (confirm('⚠️ 确定要清除所有数据吗？此操作不可恢复！') && confirm('再次确认：清除所有打卡、日志、净值记录？')) {
+        appData=getDefaultData(); saveData(appData); closeSettings();
+        stockState=[false,false,false]; futuresState=[false,false,false]; refreshAll();
+        showToast('🗑 所有数据已清除');
+    }
+}
+
+// ===================== Toast =====================
+let toastTimer;
+function showToast(msg) {
+    const toast=document.getElementById('toast'); toast.textContent=msg; toast.classList.add('show');
+    clearTimeout(toastTimer); toastTimer=setTimeout(()=>toast.classList.remove('show'),2200);
+}
+
+// ===================== Event Listeners =====================
+document.getElementById('btn-settings').addEventListener('click', openSettings);
+document.getElementById('btn-close-modal').addEventListener('click', closeSettings);
+document.getElementById('modal-overlay').addEventListener('click', function(e){ if(e.target===this) closeSettings(); });
+document.getElementById('btn-save-settings').addEventListener('click', saveSettings);
+document.getElementById('btn-reset-settings').addEventListener('click', resetSettings);
+document.getElementById('btn-reset-data').addEventListener('click', resetAllData);
+document.getElementById('btn-export').addEventListener('click', exportData);
+document.getElementById('btn-import').addEventListener('click', importData);
+document.getElementById('import-file').addEventListener('change', handleImport);
+
+// 仪表盘打卡按钮（事件委托）
+document.addEventListener('click', function(e){
+    if (e.target && e.target.id === 'dash-go-checkin') {
+        switchTab('today');
+    }
+});
+
+document.getElementById('cal-prev').addEventListener('click', ()=>{ if(calMonth===0){calYear--;calMonth=11;}else{calMonth--;} renderCalendar(appData); });
+document.getElementById('cal-next').addEventListener('click', ()=>{ const now=new Date(); if(!((calYear>now.getFullYear())||(calYear===now.getFullYear()&&calMonth>=now.getMonth()))){ if(calMonth===11){calYear++;calMonth=0;}else{calMonth++;} renderCalendar(appData); } });
+document.getElementById('hm-prev').addEventListener('click', ()=>{ hmYear--; renderHeatmap(hmYear); });
+document.getElementById('hm-next').addEventListener('click', ()=>{ const now=new Date(); if(hmYear<now.getFullYear()){ hmYear++; renderHeatmap(hmYear); } });
+document.getElementById('btn-impulse').addEventListener('click', addImpulse);
+document.getElementById('impulse-input').addEventListener('keydown', e=>{ if(e.key==='Enter'){ e.preventDefault(); addImpulse(); } });
+document.getElementById('btn-nw-add').addEventListener('click', addNetWorth);
+document.getElementById('nw-amount').addEventListener('keydown', e=>{ if(e.key==='Enter'){ e.preventDefault(); addNetWorth(); } });
+document.getElementById('btn-asset-add').addEventListener('click', addAsset);
+document.getElementById('asset-amount').addEventListener('keydown', e=>{ if(e.key==='Enter'){ e.preventDefault(); addAsset(); } });
+document.getElementById('btn-theme').addEventListener('click', toggleDarkMode);
+document.getElementById('btn-help').addEventListener('click', ()=>{ document.getElementById('help-overlay').classList.add('open'); });
+document.getElementById('btn-close-help').addEventListener('click', ()=>{ document.getElementById('help-overlay').classList.remove('open'); });
+document.getElementById('help-overlay').addEventListener('click', function(e){ if(e.target===this) this.classList.remove('open'); });
+
+// Tab switching
+document.querySelectorAll('.tab-btn').forEach(btn => {
+    btn.addEventListener('click', function() { switchTab(this.dataset.tab); });
+});
+
+document.addEventListener('keydown', function(e) {
+    if (e.key==='Escape') closeSettings();
+    if (e.ctrlKey && e.key==='d') { e.preventDefault(); doCheckIn(); }
+    if (e.ctrlKey && e.key==='i') { e.preventDefault(); document.getElementById('impulse-input').focus(); }
+    if (e.ctrlKey && e.key==='n') { e.preventDefault(); document.getElementById('nw-amount').focus(); }
+});
+
+// ===================== Service Worker =====================
+function registerSW() {
+    if ('serviceWorker' in navigator) {
+        if (location.protocol==='file:') { document.getElementById('pwa-banner').classList.add('show'); return; }
+        navigator.serviceWorker.register('sw.js').then(r=>console.log('📦 SW 已注册')).catch(()=>{});
+    }
+}
+
+// ===================== Help Content =====================
+// 【更新功能时请同步修改此数据源，帮助弹窗会自动更新】
+const HELP = [
+    { title: '🎯 这是什么', items: ['10年计划是一款<b>倒计时 + 每日纪律打卡</b>工具，帮你管住交易中的冲动操作，专注长期复利目标。'] },
+    { title: '🏠 总览标签（默认首页）', items: [
+        '<b>仪表盘</b>：一屏展示所有关键数据——剩余时间、进度、理论/实际净值、总资产、连续打卡、本月克制次数、打卡率。',
+    ]},
+    { title: '✊ 今日标签', items: [
+        '<b>交易纪律打卡</b>：分股票和期货两个模块，各 3 条纪律。全部确认后才能打卡。纪律文案可在设置中自定义。周末自动跳过。',
+        '<b>冲动交易日志</b>：想手动操作时写下来，点"记录并克制"。统计本周/本月忍住的次数。',
+    ]},
+    { title: '📊 概览标签', items: [
+        '<b>倒计时</b>：显示距离 10 年目标还剩多少天/月/年。',
+        '<b>进度条</b>：时间进度的百分比，精确到小数点后两位。',
+        '<b>复利目标看板</b>：根据设置中的本金和年化收益率计算当前月理论净值及 10 年预期终值。',
+        '<b>标题栏格言</b>：每天一句交易纪律格言，随日期自动轮换。',
+    ]},
+    { title: '💰 资产标签', items: [
+        '<b>实际净值追踪</b>：录入真实账户余额，折线图对比实际 vs 理论净值。',
+        '<b>资产分布</b>：按品类记录各项资产，甜甜圈图展示占比，折线图追踪总资产增长趋势。',
+    ]},
+    { title: '📈 记录标签', items: [
+        '<b>统计卡片</b>：当前连续打卡天数、历史最佳记录、打卡率。',
+        '<b>十年热力图</b>：GitHub 风格年度打卡视图，灰色=未打卡，浅绿=已打卡，深绿=纪律全确认。可按年切换。',
+        '<b>月度日历</b>：传统月历视图，可前后翻月，显示每日打卡状态。',
+    ]},
+    { title: '⚙️ 设置说明', items: [
+        '<b>日期范围</b>：开始和结束日期，默认 10 年。',
+        '<b>复利参数</b>：初始本金 + 预期年化收益率，用于计算理论净值。',
+        '<b>交易纪律</b>：股票 3 条 + 期货 3 条打卡确认项，可分别自定义。',
+        '<b>数据备份</b>：导出 JSON 文件备份 / 从备份恢复。换电脑或清缓存前务必导出。',
+        '<b>每日提醒</b>：设一个时间，工作日到点浏览器弹系统通知提醒打卡。首次需授权。',
+        '<b>里程碑庆祝</b>：进度每增长 X% 触发纸屑动画；天数节点（100天、1年等）也会庆祝。',
+        '<b>暗色模式</b>：标题栏月亮按钮切换亮/暗，偏好自动记住。',
+    ]},
+    { title: '⌨️ 快捷键', items: [
+        '<code>Ctrl+D</code> 打卡 &nbsp; <code>Ctrl+I</code> 冲动日志 &nbsp; <code>Ctrl+N</code> 净值录入 &nbsp; <code>Esc</code> 关闭弹窗',
+    ]},
+    { title: '💡 提示', items: [
+        '数据存在浏览器本地（localStorage），不会上传到任何服务器。<b>清除浏览器数据会丢失所有记录</b>，请定期导出备份。',
+    ]},
+];
+
+function renderHelp() {
+    document.getElementById('help-content').innerHTML = HELP.map(section =>
+        `<h3>${section.title}</h3>` + section.items.map(item => `<p>${item}</p>`).join('')
+    ).join('');
+}
+
+// ===================== Tab Switching =====================
+function switchTab(tabName) {
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    const btn = document.querySelector('.tab-btn[data-tab="'+tabName+'"]');
+    if (btn) btn.classList.add('active');
+    document.querySelectorAll('[data-tab]').forEach(el => el.classList.remove('tab-visible'));
+    document.querySelectorAll('[data-tab="'+tabName+'"]').forEach(el => el.classList.add('tab-visible'));
+}
+
+// ===================== Dark Mode =====================
+function getDarkMode() { return document.documentElement.getAttribute('data-theme') || 'light'; }
+function setDarkMode(t) {
+    if (t === 'dark') document.documentElement.setAttribute('data-theme', 'dark');
+    else document.documentElement.removeAttribute('data-theme');
+    localStorage.setItem('ten-year-dark', t);
+    updateThemeIcon();
+    drawNetWorthChart();
+}
+function toggleDarkMode() { setDarkMode(getDarkMode() === 'dark' ? 'light' : 'dark'); }
+function updateThemeIcon() {
+    const el = document.getElementById('theme-icon');
+    if (el) el.innerHTML = getDarkMode() === 'dark' ? I.sun : I.moon;
+}
+// ===================== Style Themes (placeholder) =====================
+
+
+// ===================== Notification =====================
+let notifyPermitted = false;
+function checkNotifyPermission() {
+    if (!('Notification' in window)) return;
+    if (Notification.permission === 'granted') notifyPermitted = true;
+    document.getElementById('notify-hint').textContent =
+        Notification.permission === 'granted' ? '✅ 已授权，工作日到点会弹通知'
+        : Notification.permission === 'denied' ? '⚠️ 通知已被拒绝，请在浏览器设置中开启'
+        : '💡 保存后会请求通知权限';
+}
+function requestNotifyPermission() {
+    if (!('Notification' in window)) return;
+    Notification.requestPermission().then(p => {
+        notifyPermitted = (p === 'granted');
+        checkNotifyPermission();
+    });
+}
+function checkReminder() {
+    if (!notifyPermitted || !appData.reminderTime) return;
+    const now = new Date();
+    const today = todayStr();
+    if (isWeekend(today) || isCheckedIn(today, appData)) return;
+    const [h, m] = appData.reminderTime.split(':').map(Number);
+    if (now.getHours() === h && now.getMinutes() === m) {
+        new Notification('📋 10年计划', { body: '该打卡了！确认今日交易纪律，坚持就是胜利。', icon: 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><circle cx="50" cy="50" r="45" fill="%234f6ef7"/><circle cx="50" cy="50" r="28" fill="none" stroke="white" stroke-width="6"/><circle cx="50" cy="50" r="10" fill="white"/></svg>' });
+    }
+}
+
+// ===================== Milestone Celebration =====================
+function checkMilestone() {
+    const cd = calcCountdown(appData.startDate, appData.endDate);
+    const progress = Math.floor(cd.progress);
+    const elapsed = cd.elapsedDays;
+    const milestones = [];
+
+    // 天数里程碑
+    [100, 365, 500, 730, 1000, 1500, 1825, 2000, 2500, 3000, 3650].forEach(d => {
+        if (elapsed === d) milestones.push(`🎯 ${d} 天`);
+    });
+    // 进度里程碑（按用户设定的间隔）
+    const interval = appData.milestoneInterval || 5;
+    if (interval > 0 && progress > 0 && progress % interval === 0) {
+        milestones.push(`📊 进度 ${progress}%`);
+    }
+    // 周年
+    for (let y = 1; y <= 10; y++) {
+        if (elapsed === y * 365 || elapsed === y * 365 + (y >= 2 ? Math.floor((y-1)/4) : 0)) {
+            if (!milestones.some(m => m.includes('年'))) milestones.push(`🏆 ${y} 周年`);
+        }
+    }
+
+    milestones.forEach(key => {
+        if (!appData.celebrated.includes(key)) {
+            appData.celebrated.push(key);
+            saveData(appData);
+            showConfetti();
+            showToast(`🎉 里程碑达成：${key}！`);
+        }
+    });
+}
+
+// ===================== Check-in Celebration =====================
+function showCheckinCelebration() {
+    const overlay = document.createElement('div');
+    overlay.style.cssText = 'position:fixed;inset:0;z-index:9999;display:flex;align-items:center;justify-content:center;pointer-events:none;';
+    overlay.innerHTML = `
+        <div style="animation:celeb-in 0.5s cubic-bezier(0.18,0.89,0.32,1.05) forwards;text-align:center;">
+            <div style="width:80px;height:80px;border-radius:50%;background:var(--success);margin:0 auto;display:flex;align-items:center;justify-content:center;box-shadow:0 8px 40px rgba(16,185,129,0.45);animation:celeb-pulse 0.5s ease-out;">
+                <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="4 12 10 18 20 6"/></svg>
+            </div>
+            <div style="color:var(--success-dark);font-size:1.15rem;font-weight:700;margin-top:14px;animation:celeb-fadein 0.3s 0.15s both;">打卡成功</div>
+        </div>
+    `;
+    document.body.appendChild(overlay);
+    showConfetti();
+    setTimeout(() => { overlay.style.opacity='0'; overlay.style.transition='opacity 0.3s'; }, 700);
+    setTimeout(() => { overlay.remove(); }, 1000);
+}
+
+function showConfetti() {
+    const container = document.getElementById('confetti');
+    const colors = ['#3b82f6','#10b981','#f59e0b','#ef4444','#8b5cf6','#ec4899','#06b6d4'];
+    const html = [];
+    for (let i = 0; i < 80; i++) {
+        const left = Math.random() * 100;
+        const delay = Math.random() * 0.8;
+        const duration = 2 + Math.random() * 3;
+        const color = colors[Math.floor(Math.random() * colors.length)];
+        const size = 6 + Math.random() * 8;
+        const shape = Math.random() > 0.5 ? '50%' : '2px';
+        html.push(`<div class="confetti-piece" style="left:${left}%;width:${size}px;height:${size}px;background:${color};border-radius:${shape};animation-delay:${delay}s;animation-duration:${duration}s;"></div>`);
+    }
+    container.innerHTML = html.join('');
+    const duration = (appData.confettiDuration || 6) * 1000;
+    setTimeout(() => { container.innerHTML = ''; }, duration);
+}
+
+// ===================== Icon Init =====================
+function initIcons() {
+    // 全局替换 span 占位符为 SVG 图标
+    const map = [
+        ['header-icon', I.cat],  <!-- 宇宙图标 -->
+        ['settings-icon', I.gear],
+        ['modal-settings-icon', I.gear],
+        ['tab-icon-overview', I.eye],
+        ['tab-icon-dashboard', I.home],
+        ['tab-icon-today', I.check],
+        ['tab-icon-history', I.chart],
+        ['tab-icon-assets', I.dollar],
+        ['title-icon-compound', I.trending],
+        ['title-icon-nw', I.dollar],
+        ['title-icon-assets', I.chart],
+        ['title-icon-disc', I.shield],
+        ['disc-stock-icon', I.trending],
+        ['disc-futures-icon', I.trending],
+        ['title-icon-impulse', I.pause],
+        ['title-icon-heatmap', I.grid],
+        ['stat-icon-streak', I.flame],
+        ['stat-icon-best', I.star],
+        ['stat-icon-rate', I.chart],
+        ['theme-icon', I.moon],
+        ['help-icon', I.help],
+    ];
+    map.forEach(([id, svg]) => {
+        const el = document.getElementById(id);
+        if (el) el.innerHTML = svg;
+    });
+    updateThemeIcon();
+}
+
+// ===================== Init =====================
+function init() {
+    try {
+        appData = loadData();
+
+        // 恢复亮暗模式
+        setDarkMode(localStorage.getItem('ten-year-dark') || 'light');
+        initIcons();
+        renderHelp();
+        initCalendar();
+        initHeatmap();
+        switchTab('dashboard');
+        refreshAll();
+        checkNotifyPermission();
+        registerSW();
+        setInterval(refreshAll, 60000);
+        console.log('📋 10年计划 V3 — 已就绪');
+        console.log('💡 Ctrl+D 打卡 | Ctrl+I 冲动日志 | Ctrl+N 净值录入 | Esc 关闭设置');
+    } catch(e) {
+        document.body.innerHTML = '<div style="padding:40px;max-width:600px;margin:40px auto;background:#fef2f2;border:2px solid #ef4444;border-radius:12px;font-family:monospace;"><h2 style="color:#dc2626;">⚠️ 脚本错误</h2><pre style="white-space:pre-wrap;word-break:break-all;color:#1e293b;margin:16px 0;">' + e.message + '</pre><p style="color:#64748b;">行号: ' + (e.lineNumber || '?') + '</p><p style="color:#64748b;margin-top:8px;">请截图发给开发者排查</p></div>';
+        console.error('Init error:', e);
+    }
+}
+init();
+</script>
+</body>
+</html>

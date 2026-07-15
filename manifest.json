@@ -1,0 +1,19 @@
+{
+  "name": "10年计划 · 倒计时打卡",
+  "short_name": "10年计划",
+  "description": "10年计划倒计时与每日打卡工具",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "background_color": "#f4f5f7",
+  "theme_color": "#4f6ef7",
+  "lang": "zh-CN",
+  "icons": [
+    {
+      "src": "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'><rect width='512' height='512' rx='80' fill='%234f6ef7'/><circle cx='256' cy='220' r='100' fill='none' stroke='white' stroke-width='40'/><circle cx='256' cy='220' r='30' fill='white'/></svg>",
+      "sizes": "512x512",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}
