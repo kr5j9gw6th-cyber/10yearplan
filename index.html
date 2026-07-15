@@ -384,10 +384,11 @@ body { overflow-x: hidden; }
     .nw-table { display: none; }
     .nw-compare-value { font-size: 1.15rem; }
     .nw-compare-label { font-size: 0.74rem; }
-    .nw-form { flex-wrap: wrap; }
-    .nw-form input { font-size: 0.85rem; padding: 10px; }
-    .nw-form .nw-amount { flex: 1 1 100%; }
-    .nw-form .nw-date { flex: 1; min-width: 0; }
+    .nw-form { flex-wrap: wrap; justify-content: center; text-align: center; }
+    .nw-form input { font-size: 0.85rem; padding: 10px; text-align: center; }
+    .nw-form .nw-amount { flex: 1 1 100%; max-width: 100%; }
+    .nw-form .nw-date { flex: 1 1 100%; max-width: 100%; }
+    .btn-sm { display: block; margin: 0 auto; width: 100%; max-width: 200px; }
     .asset-item { flex-wrap: wrap; }
     .asset-item-name { min-width: 80px; }
     #nw-chart { max-width: 100% !important; }
