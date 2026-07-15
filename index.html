@@ -615,6 +615,7 @@ body { overflow-x: hidden; }
 <div class="modal-overlay" id="modal-overlay">
     <div class="modal">
         <h2><span id="modal-settings-icon"></span> 设置 <button class="btn-icon" id="btn-close-modal" style="border:none;width:32px;height:32px;font-size:1rem;">✕</button></h2>
+        <div style="text-align:center;font-size:0.72rem;color:var(--text3);margin-bottom:14px;">版本 <span id="app-version"></span></div>
         <h3>👤 个人信息</h3>
         <div class="form-group"><label for="input-nickname">昵称</label><input type="text" id="input-nickname" placeholder="设置昵称后仪表盘会显示"></div>
         <h3>📅 日期范围</h3>
@@ -681,6 +682,7 @@ body { overflow-x: hidden; }
 
 const STORAGE_KEY = 'ten-year-plan-v3';
 const DEFAULT_YEARS = 10;
+const APP_VERSION = '1.7.0';
 
 // ===================== Defaults =====================
 const DEFAULT_STOCK = [
@@ -1838,26 +1840,33 @@ function handleImport(event) {
     const reader = new FileReader();
     reader.onload = function(e) {
         try {
-            const data = JSON.parse(e.target.result);
+            let raw = e.target.result;
+            // 移除可能的 BOM 头
+            if (raw.charCodeAt(0) === 0xFEFF) raw = raw.slice(1);
+            const data = JSON.parse(raw);
             if (!data.startDate || !data.endDate || !data.checkins) {
-                showToast('❌ 无效的备份文件');
+                showToast('❌ 无效的备份文件（缺少必要字段）');
                 return;
             }
-            // 确保新字段存在
+            // 补全新字段
             if (!data.impulseLog) data.impulseLog = [];
             if (!data.networthLog) data.networthLog = [];
+            if (!data.assets) data.assets = [];
+            if (!data.assetHistory) data.assetHistory = [];
             if (data.capital === undefined) data.capital = 100000;
             if (data.annualReturn === undefined) data.annualReturn = 30;
-            if (!data.disciplineItems) data.disciplineItems = [...DEFAULT_DISCIPLINES];
+            if (!data.stockDisciplines) data.stockDisciplines = [...DEFAULT_STOCK];
+            if (!data.futuresDisciplines) data.futuresDisciplines = [...DEFAULT_FUTURES];
 
             saveData(data);
             appData = data;
-            disciplineState = [false, false, false];
+            stockState = [false, false, false];
+            futuresState = [false, false, false];
             refreshAll();
             updateExportInfo();
             showToast('✅ 数据已恢复');
         } catch (err) {
-            showToast('❌ 文件格式错误');
+            showToast('❌ 文件格式错误：' + err.message);
         }
     };
     reader.readAsText(file);
@@ -2281,6 +2290,7 @@ function initIcons() {
 function init() {
     try {
         appData = loadData();
+        document.getElementById('app-version').textContent = APP_VERSION;
 
         // 恢复亮暗模式
         setDarkMode(localStorage.getItem('ten-year-dark') || 'light');
