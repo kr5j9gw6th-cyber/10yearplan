@@ -461,6 +461,7 @@ body { overflow-x: hidden; }
     <div class="card" data-tab="dashboard">
         <div id="dash-status" style="text-align:center;margin-bottom:18px;"></div>
         <div class="dash-grid" id="dash-grid"></div>
+        <div id="dash-quote" style="text-align:center;margin-top:16px;font-size:0.82rem;color:var(--text3);font-style:italic;"></div>
     </div>
 
     <!-- Countdown Hero -->
@@ -903,6 +904,7 @@ function renderDashboard() {
             <div class="dash-val">${rate}<span style="font-size:0.7em;font-weight:500;color:var(--text3);">%</span></div>
             <div class="dash-lbl">打卡率</div>
         </div>`;
+    document.getElementById('dash-quote').textContent = '「' + getDailyMaxim() + '」';
 }
 
 // ===================== Countdown =====================
