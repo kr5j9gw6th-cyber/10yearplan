@@ -440,7 +440,7 @@ body { overflow-x: hidden; }
     <!-- Header -->
     <div class="header">
         <div>
-            <h1><span id="header-icon"></span> 10年计划 <span class="header-quote" id="daily-quote">载入中...</span></h1>
+            <h1><span id="header-icon"></span> 10年计划</h1>
         </div>
         <div style="display:flex;align-items:center;">
             <button class="theme-toggle" id="btn-theme" title="切换暗色模式" aria-label="切换主题"><span id="theme-icon"></span></button>
@@ -527,11 +527,11 @@ body { overflow-x: hidden; }
         </div>
         <div class="asset-form" style="margin-top:12px;display:flex;gap:6px;flex-wrap:wrap;">
             <select id="asset-cat" style="padding:8px 10px;border:1px solid var(--border);border-radius:var(--radius-sm);font-size:0.85rem;font-family:inherit;background:var(--card);color:var(--text);flex:1;min-width:100px;">
-                <option value="股票">📈 股票</option>
-                <option value="加密货币">🪙 加密货币</option>
-                <option value="现金">💵 现金/存款</option>
-                <option value="基金">📊 基金</option>
-                <option value="其他">📦 其他</option>
+                <option value="股票">股票</option>
+                <option value="期货">期货</option>
+                <option value="现金">现金/存款</option>
+                <option value="基金">基金</option>
+                <option value="其他">其他</option>
             </select>
             <input type="text" id="asset-name" placeholder="名称" style="padding:8px 10px;border:1px solid var(--border);border-radius:var(--radius-sm);font-size:0.85rem;font-family:inherit;background:var(--card);color:var(--text);flex:1;min-width:80px;">
             <input type="number" id="asset-amount" placeholder="金额" step="100" style="padding:8px 10px;border:1px solid var(--border);border-radius:var(--radius-sm);font-size:0.85rem;font-family:inherit;background:var(--card);color:var(--text);width:100px;">
@@ -616,33 +616,33 @@ body { overflow-x: hidden; }
     <div class="modal">
         <h2><span id="modal-settings-icon"></span> 设置 <button class="btn-icon" id="btn-close-modal" style="border:none;width:32px;height:32px;font-size:1rem;">✕</button></h2>
         <div style="text-align:center;font-size:0.72rem;color:var(--text3);margin-bottom:14px;">版本 <span id="app-version"></span></div>
-        <h3>👤 个人信息</h3>
+        <h3><span id="s-icon-user"></span> 个人信息</h3>
         <div class="form-group"><label for="input-nickname">昵称</label><input type="text" id="input-nickname" placeholder="设置昵称后仪表盘会显示"></div>
-        <h3>📅 日期范围</h3>
+        <h3><span id="s-icon-date"></span> 日期范围</h3>
         <div class="form-group"><label for="input-start">开始日期</label><input type="date" id="input-start"></div>
         <div class="form-group"><label for="input-end">结束日期</label><input type="date" id="input-end"><div class="form-hint">默认为开始日期 + 10年</div></div>
-        <h3>💰 复利参数</h3>
+        <h3><span id="s-icon-money"></span> 复利参数</h3>
         <div class="form-group"><label for="input-capital">初始本金 (元)</label><input type="number" id="input-capital" step="1000" min="0"></div>
         <div class="form-group input-suffix"><label for="input-return">预期年化收益率</label><input type="number" id="input-return" step="0.5" min="0" max="200"><span class="suffix">%</span></div>
-        <h3>📋 交易纪律</h3>
-        <div class="form-hint" style="margin-bottom:10px;">📈 股票纪律</div>
+        <h3><span id="s-icon-disc"></span> 交易纪律</h3>
+        <div class="form-hint" style="margin-bottom:10px;"><span id="s-disc-stock"></span> 股票纪律</div>
         <div class="form-group"><input type="text" id="input-s1" placeholder="股票纪律 1"></div>
         <div class="form-group"><input type="text" id="input-s2" placeholder="股票纪律 2"></div>
         <div class="form-group"><input type="text" id="input-s3" placeholder="股票纪律 3"></div>
-        <div class="form-hint" style="margin-bottom:10px;margin-top:14px;">📉 期货纪律</div>
+        <div class="form-hint" style="margin-bottom:10px;margin-top:14px;"><span id="s-disc-futures"></span> 期货纪律</div>
         <div class="form-group"><input type="text" id="input-f1" placeholder="期货纪律 1"></div>
         <div class="form-group"><input type="text" id="input-f2" placeholder="期货纪律 2"></div>
         <div class="form-group"><input type="text" id="input-f3" placeholder="期货纪律 3"></div>
-        <h3>🔔 每日提醒</h3>
+        <h3><span id="s-icon-bell"></span> 每日提醒</h3>
         <div class="form-group"><label for="input-reminder">提醒时间（工作日到点弹通知）</label><input type="time" id="input-reminder"><div class="notify-hint" id="notify-hint"></div></div>
-        <h3>🎉 里程碑庆祝</h3>
+        <h3><span id="s-icon-confetti"></span> 里程碑庆祝</h3>
         <div class="form-group"><label for="input-milestone">进度每增长多少 % 庆祝一次</label><input type="number" id="input-milestone" min="1" max="50" step="1"><div class="form-hint">默认 5%，设为 1% 最密集，设为 0 关闭进度庆祝</div></div>
         <div class="form-group"><label for="input-confetti">纸屑动画时长 (秒)</label><input type="number" id="input-confetti" min="2" max="30" step="1"><div class="form-hint">默认 6 秒</div></div>
         <div class="btn-row">
             <button class="btn btn-primary" id="btn-save-settings">保存设置</button>
             <button class="btn btn-ghost" id="btn-reset-settings">恢复默认</button>
         </div>
-        <h3>💾 数据备份</h3>
+        <h3><span id="s-icon-backup"></span> 数据备份</h3>
         <div class="export-section">
             <button class="btn btn-ghost" id="btn-export" style="flex:1;">📥 导出备份</button>
             <button class="btn btn-ghost" id="btn-import" style="flex:1;">📤 恢复备份</button>
@@ -682,7 +682,7 @@ body { overflow-x: hidden; }
 
 const STORAGE_KEY = 'ten-year-plan-v3';
 const DEFAULT_YEARS = 10;
-const APP_VERSION = '1.7.0';
+const APP_VERSION = '1.9.0';
 
 // ===================== Defaults =====================
 const DEFAULT_STOCK = [
@@ -965,7 +965,7 @@ function renderDashboard() {
         </div>
         <div class="dash-item warn">
             <div class="dash-val">${formatMoney(cp.currentTarget)}</div>
-            <div class="dash-lbl">理论净值 · 第${cp.monthsElapsed}个月</div>
+            <div class="dash-lbl">理论净值 · 第${cp.daysElapsed}天</div>
         </div>
         <div class="dash-item ${gapCls}">
             <div class="dash-val">${nw?formatMoney(nw.actual):'--'}</div>
@@ -1013,18 +1013,18 @@ function calcCountdown(startStr, endStr) {
 function calcCompound(data) {
     const now = new Date();
     const start = parseDate(data.startDate);
-    const monthsElapsed = (now.getFullYear()-start.getFullYear())*12 + (now.getMonth()-start.getMonth());
+    const daysElapsed = Math.max(0, daysBetween(start, now));
     const r = data.annualReturn/100;
-    const monthlyRate = Math.pow(1+r, 1/12)-1;
-    const currentTarget = data.capital * Math.pow(1+monthlyRate, Math.max(0, monthsElapsed));
+    const dailyRate = Math.pow(1+r, 1/365)-1;
+    const currentTarget = data.capital * Math.pow(1+dailyRate, daysElapsed);
     const tenYearTarget = data.capital * Math.pow(1+r, 10);
-    return { monthsElapsed, currentTarget: Math.round(currentTarget), tenYearTarget: Math.round(tenYearTarget), monthlyRate };
+    return { daysElapsed, currentTarget: Math.round(currentTarget), tenYearTarget: Math.round(tenYearTarget), dailyRate };
 }
 
 function updateCompound() {
     const cp = calcCompound(appData);
     document.getElementById('compound-target').textContent = formatMoney(cp.currentTarget);
-    document.getElementById('compound-label').textContent = cp.monthsElapsed>=0 ? `第 ${cp.monthsElapsed} 个月理论净值` : '尚未开始';
+    document.getElementById('compound-label').textContent = cp.daysElapsed>=0 ? `第 ${cp.daysElapsed} 天理论净值` : '尚未开始';
     document.getElementById('cmp-init').textContent = formatMoney(appData.capital);
     document.getElementById('cmp-final').textContent = formatMoney(cp.tenYearTarget);
 }
@@ -1036,7 +1036,8 @@ function getDailyMaxim() {
 }
 
 function updateDailyQuote() {
-    document.getElementById('daily-quote').textContent = getDailyMaxim();
+    const el = document.getElementById('daily-quote');
+    if (el) el.textContent = getDailyMaxim();
 }
 
 // ===================== Net Worth =====================
@@ -1235,8 +1236,8 @@ function renderNetWorth() {
         const recent = log.slice(0, 10);
         tbody.innerHTML = recent.map((item, i) => {
             const recordDate = parseDate(item.date);
-            const monthsElapsed = (recordDate.getFullYear()-parseDate(appData.startDate).getFullYear())*12 + (recordDate.getMonth()-parseDate(appData.startDate).getMonth());
-            const theoretical = Math.round(appData.capital * Math.pow(1+cp.monthlyRate, Math.max(0, monthsElapsed)));
+            const daysFromStart = Math.max(0, daysBetween(parseDate(appData.startDate), recordDate));
+            const theoretical = Math.round(appData.capital * Math.pow(1+cp.dailyRate, daysFromStart));
             const gap = item.amount - theoretical;
             const gapPct = theoretical>0 ? (gap/theoretical*100) : 0;
             const gapCls = gap>=0 ? 'gap-pos' : 'gap-neg';
@@ -1257,10 +1258,10 @@ function renderNetWorth() {
 
 // ===================== Asset Tracking =====================
 const ASSET_COLORS = {
-    '股票': '#ef4444', '加密货币': '#f59e0b', '现金': '#3b82f6',
+    '股票': '#ef4444', '期货': '#f59e0b', '现金': '#3b82f6',
     '基金': '#10b981', '其他': '#8b5cf6'
 };
-const ASSET_CATS = ['股票','加密货币','现金','基金','其他'];
+const ASSET_CATS = ['股票','期货','现金','基金','其他'];
 
 function calcAssetTotal() {
     return (appData.assets || []).reduce((sum, a) => sum + (a.amount || 0), 0);
@@ -1421,18 +1422,37 @@ function drawAssetGrowthChart() {
     hist.forEach((h, i) => { ctx.beginPath(); ctx.arc(xP(i), yP(h.total), 3, 0, Math.PI*2); ctx.fill(); });
 }
 
+let editAssetId = null;
+function editAsset(id) {
+    const asset = (appData.assets||[]).find(a => a.id === id);
+    if (!asset) return;
+    document.getElementById('asset-cat').value = asset.category;
+    document.getElementById('asset-name').value = asset.name;
+    document.getElementById('asset-amount').value = asset.amount;
+    document.getElementById('btn-asset-add').textContent = '更新';
+    editAssetId = id;
+}
+
 function addAsset() {
     const cat = document.getElementById('asset-cat').value;
     const name = document.getElementById('asset-name').value.trim();
     const amount = parseInt(document.getElementById('asset-amount').value);
     if (!name) { showToast('请输入资产名称'); return; }
     if (!amount || amount <= 0) { showToast('请输入有效金额'); return; }
-    appData.assets.push({ id: Date.now(), category: cat, name, amount });
+    if (editAssetId) {
+        const asset = (appData.assets||[]).find(a => a.id === editAssetId);
+        if (asset) { asset.category = cat; asset.name = name; asset.amount = amount; }
+        editAssetId = null;
+        document.getElementById('btn-asset-add').textContent = '添加';
+        showToast('✅ 资产已更新');
+    } else {
+        appData.assets.push({ id: Date.now(), category: cat, name, amount });
+        showToast('✅ 资产已添加');
+    }
     saveAssetSnapshot();
     document.getElementById('asset-name').value = '';
     document.getElementById('asset-amount').value = '';
     renderAssets();
-    showToast('✅ 资产已添加');
 }
 
 function deleteAsset(id) {
@@ -1454,11 +1474,11 @@ function renderAssets() {
         return;
     }
     listEl.innerHTML = assets.map(a => `
-        <div class="asset-item">
+        <div class="asset-item" style="cursor:pointer;" onclick="editAsset(${a.id})" title="点击编辑">
             <span class="asset-item-cat" style="background:${ASSET_COLORS[a.category]}20;color:${ASSET_COLORS[a.category]}">${a.category}</span>
             <span class="asset-item-name">${escapeHtml(a.name)}</span>
             <span class="asset-item-amount">${formatMoney(a.amount)}</span>
-            <button class="asset-item-del" onclick="deleteAsset(${a.id})" title="删除">×</button>
+            <button class="asset-item-del" onclick="event.stopPropagation();deleteAsset(${a.id})" title="删除">×</button>
         </div>
     `).join('');
 }
@@ -2278,6 +2298,15 @@ function initIcons() {
         ['stat-icon-rate', I.chart],
         ['theme-icon', I.moon],
         ['help-icon', I.help],
+        ['s-icon-user', I.cat],
+        ['s-icon-date', I.cal],
+        ['s-icon-money', I.dollar],
+        ['s-icon-disc', I.shield],
+        ['s-icon-bell', I.bell],
+        ['s-icon-confetti', I.star],
+        ['s-icon-backup', I.check],
+        ['s-disc-stock', I.trending],
+        ['s-disc-futures', I.trending],
     ];
     map.forEach(([id, svg]) => {
         const el = document.getElementById(id);
