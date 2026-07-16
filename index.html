@@ -231,9 +231,11 @@ body { overflow-x: hidden; }
 .heatmap-grid { display: inline-grid; gap: 3.5px; }
 .heatmap-cell { width: 14px; height: 14px; border-radius: 3px; cursor: default; transition: transform 0.12s; }
 .heatmap-cell:hover { transform: scale(1.4); z-index: 1; outline: 1.5px solid rgba(0,0,0,0.35); border-radius: 3px; }
-.heatmap-cell.l0 { background: #e8eaed; }
-.heatmap-cell.l1 { background: #86e0a4; }
-.heatmap-cell.l2 { background: #2ea44f; }
+.heatmap-cell.l0 { background: #e8eaed; }   /* 未打卡 */
+.heatmap-cell.l1 { background: #e8eaed; }   /* 已打卡但未确认纪律 */
+.heatmap-cell.l2 { background: #2ea44f; }   /* 全部6条确认 */
+.heatmap-cell.l3 { background: #e06060; }   /* 1-4条确认 */
+.heatmap-cell.l4 { background: #f0a0a0; }   /* 5条确认（差一条） */
 .heatmap-cell.lf { background: transparent; }
 .heatmap-cell.today-ring { outline: 2px solid var(--accent); outline-offset: -1px; border-radius: 3px; }
 .heatmap-year-nav { display: flex; align-items: center; justify-content: center; gap: 20px; margin-bottom: 14px; }
@@ -334,6 +336,9 @@ body { overflow-x: hidden; }
 [data-theme="dark"] .form-group input { background: #0d1117; color: #e6edf3; border-color: #30363d; }
 [data-theme="dark"] .heatmap-cell.lf { background: transparent; }
 [data-theme="dark"] .heatmap-cell.l0 { background: #21262d; }
+[data-theme="dark"] .heatmap-cell.l1 { background: #21262d; }
+[data-theme="dark"] .heatmap-cell.l3 { background: #b04040; }
+[data-theme="dark"] .heatmap-cell.l4 { background: #d08080; }
 [data-theme="dark"] .modal-overlay { background: rgba(0,0,0,0.7); }
 [data-theme="dark"] .btn-ghost:hover,
 [data-theme="dark"] .tab-btn:hover { background: #1c2433; }
@@ -342,7 +347,9 @@ body { overflow-x: hidden; }
 [data-theme="dark"] #nw-chart { background: #111820; }
 
 /* Theme Toggle */
-.theme-toggle { width: 38px; height: 38px; border: 1px solid var(--border); border-radius: 50%; background: var(--card); cursor: pointer; font-size: 1.1rem; display: flex; align-items: center; justify-content: center; transition: all 0.2s; color: var(--text2); margin-right: 8px; }
+.theme-toggle { width: 38px; height: 38px; border: 1px solid var(--border); border-radius: 50%; background: var(--card); cursor: pointer; font-size: 1.1rem; display: flex; align-items: center; justify-content: center; transition: all 0.2s; color: var(--text2); margin-right: 10px; }
+.btn-icon { margin-right: 10px; }
+.btn-icon:last-child { margin-right: 0; }
 .theme-toggle:hover { background: var(--bg); color: var(--accent); }
 .theme-toggle .icon { width: 1.1em; height: 1.1em; }
 
@@ -587,11 +594,10 @@ body { overflow-x: hidden; }
         </div>
         <div class="heatmap-wrapper" id="heatmap-wrapper"></div>
         <div class="heatmap-legend">
-            <span>灰色=未打卡</span>
-            <span style="margin:0 8px;">|</span>
-            <span>浅绿=已打卡</span>
-            <span style="margin:0 8px;">|</span>
-            <span>深绿=纪律全确认</span>
+            <span>灰色=未打卡</span><span style="margin:0 6px;">|</span>
+            <span>深绿=全确认</span><span style="margin:0 6px;">|</span>
+            <span>浅红=差1条</span><span style="margin:0 6px;">|</span>
+            <span>深红=差多条</span>
         </div>
     </div>
 
@@ -666,6 +672,13 @@ body { overflow-x: hidden; }
     <div class="modal" style="max-width:560px;max-height:85vh;overflow-y:auto;">
         <h2>📖 软件说明 <button class="btn-icon" id="btn-close-help" style="border:none;width:32px;height:32px;font-size:1rem;">✕</button></h2>
         <div class="help-content" id="help-content"></div>
+    </div>
+</div>
+
+<!-- Day Detail Modal -->
+<div class="modal-overlay" id="day-detail-overlay">
+    <div class="modal" style="max-width:380px;">
+        <div id="day-detail-content"></div>
     </div>
 </div>
 
@@ -1146,7 +1159,8 @@ function drawNetWorthChart() {
     ctx.strokeStyle = gridColor;
     ctx.lineWidth = 0.5;
     ctx.fillStyle = textColor;
-    ctx.font = '11px -apple-system, sans-serif';
+    const fontSize = W < 400 ? 12 : 11;
+    ctx.font = `${fontSize}px -apple-system, sans-serif`;
     ctx.textAlign = 'right';
     const gridLines = 5;
     for (let i = 0; i <= gridLines; i++) {
@@ -1159,7 +1173,7 @@ function drawNetWorthChart() {
     // X轴标签
     ctx.textAlign = 'center';
     ctx.fillStyle = textColor;
-    ctx.font = '10px -apple-system, sans-serif';
+    ctx.font = `${fontSize - 1}px -apple-system, sans-serif`;
     const maxLabels = Math.min(points.length, 8);
     const step = Math.max(1, Math.floor((points.length - 1) / (maxLabels - 1)));
     for (let i = 0; i < points.length; i += step) {
@@ -1196,13 +1210,13 @@ function drawNetWorthChart() {
     // 图例
     const lx = W - pad.right - 160, ly = pad.top + 4;
     ctx.fillStyle = '#10b981'; ctx.fillRect(lx, ly, 14, 3);
+    const legendFont = W < 400 ? 12 : 11;
     ctx.fillStyle = dark ? '#e6edf3' : '#1e293b';
-    ctx.font = 'bold 11px -apple-system, sans-serif'; ctx.textAlign = 'left';
+    ctx.font = `bold ${legendFont}px -apple-system, sans-serif`; ctx.textAlign = 'left';
     ctx.fillText('实际净值', lx + 20, ly + 4);
     ctx.setLineDash([5, 3]); ctx.strokeStyle = '#3b82f6'; ctx.lineWidth = 1.5;
     ctx.beginPath(); ctx.moveTo(lx, ly + 16); ctx.lineTo(lx + 14, ly + 16); ctx.stroke();
     ctx.setLineDash([]);
-    ctx.fillStyle = dark ? '#e6edf3' : '#1e293b'; ctx.font = 'bold 11px -apple-system, sans-serif';
     ctx.fillText('理论净值', lx + 20, ly + 20);
 }
 
@@ -1337,15 +1351,16 @@ function renderAssetLegend() {
 
 function saveAssetSnapshot() {
     const total = calcAssetTotal();
+    const byCat = calcAssetByCat();
     const today = todayStr();
     const hist = appData.assetHistory || [];
-    // 同一天覆盖，否则追加
     if (hist.length > 0 && hist[hist.length - 1].date === today) {
         hist[hist.length - 1].total = total;
+        hist[hist.length - 1].byCat = byCat;
     } else {
-        hist.push({ date: today, total });
+        hist.push({ date: today, total, byCat });
     }
-    if (hist.length > 500) hist.shift(); // 保留最近500条
+    if (hist.length > 500) hist.shift();
     appData.assetHistory = hist;
     saveData(appData);
 }
@@ -1388,8 +1403,9 @@ function drawAssetGrowthChart() {
     const yP = v => pad.top + ph - ((v - yMin) / ySpan) * ph;
 
     // 网格
+    const aFontSize = W < 400 ? 11 : 9;
     ctx.strokeStyle = gridC; ctx.lineWidth = 0.5;
-    ctx.fillStyle = textC; ctx.font = '9px -apple-system, sans-serif'; ctx.textAlign = 'right';
+    ctx.fillStyle = textC; ctx.font = `${aFontSize}px -apple-system, sans-serif`; ctx.textAlign = 'right';
     for (let i = 0; i <= 4; i++) {
         const v = yMin + ySpan * i / 4;
         const y = yP(v);
@@ -1398,39 +1414,49 @@ function drawAssetGrowthChart() {
     }
     // X轴
     ctx.textAlign = 'center';
+    ctx.font = `${aFontSize - 1}px -apple-system, sans-serif`;
     const step = Math.max(1, Math.floor((hist.length - 1) / 6));
     for (let i = 0; i < hist.length; i += step) {
         ctx.fillText(hist[i].date.slice(5), xP(i), H - pad.bottom + 14);
     }
     ctx.fillText(hist[hist.length-1].date.slice(5), xP(hist.length-1), H - pad.bottom + 14);
 
-    // 填充区域
-    ctx.fillStyle = dark ? 'rgba(79,110,247,0.12)' : 'rgba(79,110,247,0.08)';
-    ctx.beginPath();
-    hist.forEach((h, i) => { const x = xP(i); i === 0 ? ctx.moveTo(x, yP(yMin)) : ctx.lineTo(x, yP(yMin)); ctx.lineTo(x, yP(h.total)); });
-    ctx.lineTo(xP(hist.length-1), yP(yMin));
-    ctx.closePath(); ctx.fill();
+    // 分类折线
+    ASSET_CATS.forEach(cat => {
+        const color = ASSET_COLORS[cat];
+        if (!hist.some(h => h.byCat && h.byCat[cat] > 0)) return;
+        ctx.strokeStyle = color; ctx.lineWidth = 1.5;
+        ctx.setLineDash([4, 3]);
+        ctx.beginPath();
+        let started = false;
+        hist.forEach((h, i) => {
+            const val = (h.byCat && h.byCat[cat]) || 0;
+            if (val <= 0 && !started) return;
+            const x = xP(i), y = yP(val);
+            if (!started) { ctx.moveTo(x, y); started = true; }
+            else { ctx.lineTo(x, y); }
+        });
+        ctx.stroke();
+        ctx.setLineDash([]);
+    });
 
-    // 折线
-    ctx.strokeStyle = '#4f6ef7'; ctx.lineWidth = 2;
+    // 总资产折线（加粗）
+    ctx.strokeStyle = '#4f6ef7'; ctx.lineWidth = 2.5;
     ctx.beginPath();
-    hist.forEach((h, i) => { const x = xP(i), y = yP(h.total); i === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y); });
+    hist.forEach((h, i) => { const x = xP(i), y = yP(h.total||0); i === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y); });
     ctx.stroke();
-
-    // 数据点
-    ctx.fillStyle = '#4f6ef7';
-    hist.forEach((h, i) => { ctx.beginPath(); ctx.arc(xP(i), yP(h.total), 3, 0, Math.PI*2); ctx.fill(); });
 }
 
 let editAssetId = null;
-function editAsset(id) {
+function editAssetInline(id) {
     const asset = (appData.assets||[]).find(a => a.id === id);
     if (!asset) return;
-    document.getElementById('asset-cat').value = asset.category;
-    document.getElementById('asset-name').value = asset.name;
-    document.getElementById('asset-amount').value = asset.amount;
-    document.getElementById('btn-asset-add').textContent = '更新';
-    editAssetId = id;
+    const newAmount = prompt(`修改 ${asset.name}（${asset.category}）的金额：`, asset.amount);
+    if (newAmount !== null && !isNaN(parseInt(newAmount)) && parseInt(newAmount) > 0) {
+        asset.amount = parseInt(newAmount);
+        saveAssetSnapshot();
+        renderAssets();
+    }
 }
 
 function addAsset() {
@@ -1474,7 +1500,7 @@ function renderAssets() {
         return;
     }
     listEl.innerHTML = assets.map(a => `
-        <div class="asset-item" style="cursor:pointer;" onclick="editAsset(${a.id})" title="点击编辑">
+        <div class="asset-item" style="cursor:pointer;" onclick="editAssetInline(${a.id})" title="点击修改金额">
             <span class="asset-item-cat" style="background:${ASSET_COLORS[a.category]}20;color:${ASSET_COLORS[a.category]}">${a.category}</span>
             <span class="asset-item-name">${escapeHtml(a.name)}</span>
             <span class="asset-item-amount">${formatMoney(a.amount)}</span>
@@ -1489,12 +1515,15 @@ function getCheckinData(ds, data) {
     const v = data.checkins[ds]; if (!v) return null;
     return typeof v==='object' ? v : { time: String(v), disciplines: [true,true,true], note: '' };
 }
-function allDisciplinesConfirmed(ds, data) {
+function countDisciplinesConfirmed(ds, data) {
     const cd = getCheckinData(ds, data);
-    if (!cd) return false;
+    if (!cd) return 0;
     const sc = cd.stockConfirmed || cd.disciplines || [];
     const fc = cd.futuresConfirmed || cd.disciplines || [];
-    return sc.every(Boolean) && fc.every(Boolean);
+    return [...sc, ...fc].filter(Boolean).length;
+}
+function allDisciplinesConfirmed(ds, data) {
+    return countDisciplinesConfirmed(ds, data) >= 6;
 }
 
 let stockState = [false, false, false];
@@ -1533,9 +1562,8 @@ function toggleDiscipline(prefix, idx) {
 function updateCheckinBtn() {
     const btn = document.getElementById('btn-checkin');
     if (!btn) return;
-    const allOk = stockState.every(Boolean) && futuresState.every(Boolean);
-    btn.disabled = !allOk;
-    btn.innerHTML = allOk ? I.check + ' 确认并打卡' : (stockState.every(Boolean) ? '请确认期货纪律' : futuresState.every(Boolean) ? '请确认股票纪律' : '请确认全部纪律');
+    btn.disabled = false;
+    btn.innerHTML = I.check + ' 确认并打卡';
 }
 
 function updateCheckIn() {
@@ -1561,10 +1589,10 @@ function updateCheckIn() {
     } else if (checked) {
         const cd = getCheckinData(today, appData);
         const stockTexts = (cd.stockConfirmed || []).map((ok, i) =>
-            `<span>${ok?I.check:''} ${escapeHtml(appData.stockDisciplines[i]||'')}</span>`
+            `<span style="color:${ok?'var(--success-dark)':'var(--danger)'}">${ok?I.check:'✕'} ${escapeHtml(appData.stockDisciplines[i]||'')}</span>`
         ).join('<br>');
         const futuresTexts = (cd.futuresConfirmed || []).map((ok, i) =>
-            `<span>${ok?I.check:''} ${escapeHtml(appData.futuresDisciplines[i]||'')}</span>`
+            `<span style="color:${ok?'var(--success-dark)':'var(--danger)'}">${ok?I.check:'✕'} ${escapeHtml(appData.futuresDisciplines[i]||'')}</span>`
         ).join('<br>');
         actionEl.innerHTML = `
             <div class="checkin-done">
@@ -1576,7 +1604,7 @@ function updateCheckIn() {
             </div>`;
     } else {
         updateCheckinBtn();
-        actionEl.innerHTML = `<button class="btn-checkin" id="btn-checkin" onclick="doCheckIn()" disabled>${I.check} 请先确认全部纪律</button>`;
+        actionEl.innerHTML = `<button class="btn-checkin" id="btn-checkin" onclick="doCheckIn()">${I.check} 确认并打卡</button>`;
     }
 
     const streakEl = document.getElementById('checkin-streak');
@@ -1604,17 +1632,16 @@ function doCheckIn() {
     const today = todayStr();
     if (isWeekend(today)) { showToast('今天是周末，休息吧 😊'); return; }
     if (isCheckedIn(today, appData)) { showToast('今天已经打过卡了 😊'); return; }
-    if (!stockState.every(Boolean) || !futuresState.every(Boolean)) { showToast('请确认全部纪律后再打卡'); return; }
-
     const now = new Date();
     const time = `${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}`;
     const note = document.getElementById('checkin-note').value.trim();
+    const confirmedCount = [...stockState, ...futuresState].filter(Boolean).length;
     appData.checkins[today] = { time, stockConfirmed: [...stockState], futuresConfirmed: [...futuresState], note };
     saveData(appData);
     stockState = [false, false, false];
     futuresState = [false, false, false];
-    showCheckinCelebration();
-    showToast('✅ 打卡成功！');
+    if (confirmedCount >= 6) { showCheckinCelebration(); showToast('🎉 6条全确认！完美的一天！'); }
+    else { showSadEmoji(); showToast('💪 已打卡，明天争取全确认！'); }
     refreshAll();
 }
 
@@ -1757,7 +1784,14 @@ function renderCalendar(data) {
         if (holiday) cls.push('holiday');
         if (ds===today) cls.push('today');
         if (isCheckedIn(ds,data)) cls.push('checked-in');
-        html+=`<div class="${cls.join(' ')}" title="${formatDateCN(ds)} ${dayName(ds)}${holiday?' 🎉'+holiday:''}${isCheckedIn(ds,data)?' ✓':''}">`;
+        let calTip = `${formatDateCN(ds)} ${dayName(ds)}${holiday?' · '+holiday:''}`;
+        if (isCheckedIn(ds,data)) {
+            const cnt = countDisciplinesConfirmed(ds, data);
+            calTip += ` · 已打卡 · ${cnt}/6条确认`;
+            const cd = getCheckinData(ds, data);
+            if (cd && cd.note) calTip += ` · ${cd.note}`;
+        }
+        html+=`<div class="${cls.join(' ')}" title="${escapeHtml(calTip)}" onclick="showDayDetail('${ds}')">`;
         html+=`<span class="cal-num">${d}</span>`;
         if (holiday) html+=`<span class="cal-holiday">${holiday}</span>`;
         html+=`</div>`;
@@ -1772,6 +1806,46 @@ function renderCalendar(data) {
     const now=new Date();
     document.getElementById('cal-prev').disabled=(calYear===2020&&calMonth===0);
     document.getElementById('cal-next').disabled=(calYear>now.getFullYear())||(calYear===now.getFullYear()&&calMonth>=now.getMonth());
+}
+function showDayDetail(ds) {
+    const checked = isCheckedIn(ds, appData);
+    const cd = getCheckinData(ds, appData);
+    const cnt = countDisciplinesConfirmed(ds, appData);
+    const holiday = getHoliday(ds);
+
+    let stockHtml = '', futuresHtml = '';
+    if (cd) {
+        const sItems = (cd.stockConfirmed||[]).map((ok,i)=>
+            `<div style="color:${ok?'var(--success-dark)':'var(--danger)'};font-size:0.8rem;">${ok?I.check:'✕'} ${escapeHtml(appData.stockDisciplines[i]||'')}</div>`
+        ).join('');
+        const fItems = (cd.futuresConfirmed||[]).map((ok,i)=>
+            `<div style="color:${ok?'var(--success-dark)':'var(--danger)'};font-size:0.8rem;">${ok?I.check:'✕'} ${escapeHtml(appData.futuresDisciplines[i]||'')}</div>`
+        ).join('');
+        stockHtml = `<div style="margin-top:6px;"><b>📈 股票</b></div>${sItems}`;
+        futuresHtml = `<div style="margin-top:6px;"><b>📉 期货</b></div>${fItems}`;
+    }
+
+    const overlay = document.getElementById('day-detail-overlay');
+    const content = document.getElementById('day-detail-content');
+    const impulses = (appData.impulseLog||[]).filter(item => item.date === ds);
+    let impulseHtml = '';
+    if (impulses.length > 0) {
+        impulseHtml = `<div style="margin-top:10px;padding-top:8px;border-top:1px solid var(--border);"><b>🧘 冲动记录</b></div>`;
+        impulses.forEach(item => {
+            impulseHtml += `<div style="font-size:0.8rem;color:var(--text2);margin-top:4px;">${item.time} · ${escapeHtml(item.text)}</div>`;
+        });
+    }
+
+    content.innerHTML = `
+        <h3 style="margin-bottom:8px;">${formatDateCN(ds)} ${dayName(ds)}${holiday?' · '+holiday:''}</h3>
+        ${checked
+            ? `<div style="color:var(--success-dark);font-weight:600;margin-bottom:6px;">✅ 已打卡 · ${cd.time} · ${cnt}/6 条确认</div>${stockHtml}${futuresHtml}${cd.note?`<div style="margin-top:8px;font-style:italic;color:var(--text2);">💬 ${escapeHtml(cd.note)}</div>`:''}`
+            : `<div style="color:var(--text3);">未打卡</div>`
+        }
+        ${impulseHtml}
+        <button onclick="document.getElementById('day-detail-overlay').classList.remove('open')" style="margin-top:14px;padding:8px 24px;border-radius:50px;border:1px solid var(--border);background:var(--card);color:var(--text2);cursor:pointer;font-family:inherit;font-size:0.85rem;">关闭</button>
+    `;
+    overlay.classList.add('open');
 }
 function initCalendar() { const now=new Date(); calYear=now.getFullYear(); calMonth=now.getMonth(); }
 
@@ -1814,11 +1888,26 @@ function renderHeatmap(year) {
             const d=new Date(firstMonday); d.setDate(firstMonday.getDate()+col*7+row);
             const ds=dateStr(d); let cls='heatmap-cell ';
             if (d<jan1||d>dec31||d>now) { cls+='lf'; }
-            else if (isCheckedIn(ds,appData)) { cls+=allDisciplinesConfirmed(ds,appData)?'l2':'l1'; }
+            else if (isCheckedIn(ds,appData)) {
+                const cnt = countDisciplinesConfirmed(ds, appData);
+                if (cnt >= 6) cls+='l2';
+                else if (cnt >= 5) cls+='l4';
+                else if (cnt >= 1) cls+='l3';
+                else cls+='l1';
+            }
             else { cls+='l0'; }
             if (ds===today) cls+=' today-ring';
-            const title=d>=jan1&&d<=dec31?`${formatDateCN(ds)} ${dayName(ds)}${isCheckedIn(ds,appData)?(allDisciplinesConfirmed(ds,appData)?' ✅':' ✓'):' ✗'}`:'';
-            gridHtml+=`<div class="${cls}" title="${title}"></div>`;
+            let tip='';
+            if (d>=jan1&&d<=dec31) {
+                tip = `${formatDateCN(ds)} ${dayName(ds)}`;
+                if (isCheckedIn(ds,appData)) {
+                    const cnt = countDisciplinesConfirmed(ds, appData);
+                    tip += ` · 已打卡 · ${cnt}/6条确认`;
+                    const cd = getCheckinData(ds, appData);
+                    if (cd && cd.note) tip += ` · ${cd.note}`;
+                } else { tip += ' · 未打卡'; }
+            }
+            gridHtml+=`<div class="${cls}" title="${escapeHtml(tip)}"></div>`;
         }
     }
     wrapper.innerHTML=`<div style="display:inline-block;text-align:left;">${mlHtml}<div class="heatmap-grid" style="grid-template-columns:repeat(${weeks},${cellSize}px);grid-template-rows:repeat(5,${cellSize}px);">${gridHtml}</div></div>`;
@@ -2066,6 +2155,7 @@ document.getElementById('btn-theme').addEventListener('click', toggleDarkMode);
 document.getElementById('btn-help').addEventListener('click', ()=>{ document.getElementById('help-overlay').classList.add('open'); });
 document.getElementById('btn-close-help').addEventListener('click', ()=>{ document.getElementById('help-overlay').classList.remove('open'); });
 document.getElementById('help-overlay').addEventListener('click', function(e){ if(e.target===this) this.classList.remove('open'); });
+document.getElementById('day-detail-overlay').addEventListener('click', function(e){ if(e.target===this) this.classList.remove('open'); });
 
 // Tab switching
 document.querySelectorAll('.tab-btn').forEach(btn => {
@@ -2238,6 +2328,20 @@ function checkMilestone() {
 }
 
 // ===================== Check-in Celebration =====================
+function showSadEmoji() {
+    const overlay = document.createElement('div');
+    overlay.style.cssText = 'position:fixed;inset:0;z-index:9999;display:flex;align-items:center;justify-content:center;pointer-events:none;';
+    overlay.innerHTML = `
+        <div style="animation:celeb-in 0.5s cubic-bezier(0.18,0.89,0.32,1.05) forwards;text-align:center;">
+            <div style="font-size:70px;animation:celeb-pulse 0.5s ease-out;">😢</div>
+            <div style="color:var(--text2);font-size:1rem;font-weight:600;margin-top:12px;animation:celeb-fadein 0.3s 0.15s both;">明天继续加油</div>
+        </div>
+    `;
+    document.body.appendChild(overlay);
+    setTimeout(() => { overlay.style.opacity='0'; overlay.style.transition='opacity 0.3s'; }, 700);
+    setTimeout(() => { overlay.remove(); }, 1000);
+}
+
 function showCheckinCelebration() {
     const overlay = document.createElement('div');
     overlay.style.cssText = 'position:fixed;inset:0;z-index:9999;display:flex;align-items:center;justify-content:center;pointer-events:none;';
